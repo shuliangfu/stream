@@ -66,7 +66,11 @@ export type {
 } from "./types.ts";
 
 // 导出管理器
-export { StreamManager, type StreamManagerOptions } from "./manager.ts";
+export {
+  StreamManager,
+  type StreamManagerOptions,
+  type SupportedAdapterType,
+} from "./manager.ts";
 
 // 导出适配器
 export type { AdapterOptions, StreamAdapter } from "./adapters/base.ts";
@@ -105,6 +109,8 @@ export {
   type FFmpegSubscribeOptions,
   publishWithFFmpeg,
   subscribeWithFFmpeg,
+  transcodeToHLS,
+  type TranscodeToHLSOptions,
 } from "./utils/ffmpeg.ts";
 export { generateId, generateRoomId, generateStreamId } from "./utils/id.ts";
 export * from "./utils/protocol.ts";

@@ -7,28 +7,34 @@
  * - 协调适配器和服务器
  */
 
+import type { AdapterOptions, StreamAdapter } from "./adapters/base.ts";
+import { FFmpegAdapter, type FFmpegAdapterConfig } from "./adapters/ffmpeg.ts";
+import { SRSAdapter, type SRSAdapterConfig } from "./adapters/srs.ts";
 import type {
+  ListOptions,
+  Publisher,
+  PublisherOptions,
+  Room,
+  RoomOptions,
   Stream,
   StreamOptions,
   StreamStatistics,
-  Publisher,
   Subscriber,
-  PublisherOptions,
   SubscriberOptions,
-  Room,
-  RoomOptions,
-  ListOptions,
 } from "./types.ts";
-import type { StreamAdapter, AdapterOptions } from "./adapters/base.ts";
-import { FFmpegAdapter, type FFmpegAdapterConfig } from "./adapters/ffmpeg.ts";
-import { SRSAdapter, type SRSAdapterConfig } from "./adapters/srs.ts";
+
+/**
+ * 当前支持的适配器类型
+ * @description 仅支持 srs | ffmpeg | custom，后续可能扩展 nginx-rtmp、livekit
+ */
+export type SupportedAdapterType = "srs" | "ffmpeg" | "custom";
 
 /**
  * 流管理器选项
  */
 export interface StreamManagerOptions {
-  /** 适配器类型 */
-  adapter: "srs" | "nginx-rtmp" | "livekit" | "ffmpeg" | "custom";
+  /** 适配器类型（当前支持: srs、ffmpeg、custom） */
+  adapter: SupportedAdapterType;
   /** 适配器配置 */
   adapterConfig?: AdapterOptions;
   /** 服务器配置（兼容旧配置） */
@@ -125,24 +131,41 @@ export class StreamManager {
   /**
    * 列出所有流
    *
-   * @param options 列表选项
+   * @param options 列表选项，filter 支持 name、roomId、status、protocol；有 filter 时先过滤再分页
    * @returns 流对象数组
    */
   async listStreams(options?: ListOptions): Promise<Stream[]> {
-    return await this.adapter.listStreams({
-      limit: options?.limit,
-      offset: options?.offset,
-    });
+    const hasFilter = options?.filter && Object.keys(options.filter).length > 0;
+    let list: Stream[];
+    if (hasFilter) {
+      list = await this.adapter.listStreams({});
+      list = this.applyStreamFilter(list, options!.filter!);
+    } else {
+      list = await this.adapter.listStreams({
+        limit: options?.limit,
+        offset: options?.offset,
+      });
+    }
+    if (hasFilter && (options?.limit != null || options?.offset != null)) {
+      const offset = options?.offset ?? 0;
+      const limit = options?.limit ?? list.length;
+      list = list.slice(offset, offset + limit);
+    }
+    return list;
   }
 
   /**
    * 创建房间
    *
+   * 房间数据仅保存在内存中，进程重启后丢失；不与适配器（SRS/FFmpeg）同步。
+   *
    * @param options 房间选项
    * @returns 房间对象
    */
   createRoom(options: RoomOptions): Promise<Room> {
-    const roomId = `room-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const roomId = `room-${Date.now()}-${
+      Math.random().toString(36).substring(2, 9)
+    }`;
     const room: Room = {
       id: roomId,
       name: options.name,
@@ -182,14 +205,51 @@ export class StreamManager {
   /**
    * 列出所有房间
    *
-   * @param options 列表选项
+   * @param options 列表选项，filter 支持 name、isPrivate 等字段匹配；房间为内存存储，不持久化
    * @returns 房间对象数组
    */
   listRooms(options?: ListOptions): Promise<Room[]> {
-    const rooms = Array.from(this.rooms.values());
+    let rooms = Array.from(this.rooms.values());
+    if (options?.filter && Object.keys(options.filter).length > 0) {
+      rooms = this.applyRoomFilter(rooms, options.filter);
+    }
     const offset = options?.offset || 0;
-    const limit = options?.limit || rooms.length;
+    const limit = options?.limit ?? rooms.length;
     return Promise.resolve(rooms.slice(offset, offset + limit));
+  }
+
+  /**
+   * 根据 filter 过滤流列表（支持 name、roomId、status、protocol）
+   */
+  private applyStreamFilter(
+    streams: Stream[],
+    filter: Record<string, unknown>,
+  ): Stream[] {
+    return streams.filter((s) => {
+      if (filter.name != null && s.name !== filter.name) return false;
+      if (filter.roomId != null && s.roomId !== filter.roomId) return false;
+      if (filter.status != null && s.status !== filter.status) return false;
+      if (filter.protocol != null && s.protocol !== filter.protocol) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  /**
+   * 根据 filter 过滤房间列表（支持 name、isPrivate）
+   */
+  private applyRoomFilter(
+    rooms: Room[],
+    filter: Record<string, unknown>,
+  ): Room[] {
+    return rooms.filter((r) => {
+      if (filter.name != null && r.name !== filter.name) return false;
+      if (filter.isPrivate != null && r.isPrivate !== filter.isPrivate) {
+        return false;
+      }
+      return true;
+    });
   }
 
   /**

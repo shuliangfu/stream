@@ -1,7 +1,8 @@
 /**
  * @fileoverview 服务端拉流器实现
  *
- * 使用 Socket.io 进行信令通信，支持 RTMP、HLS、FLV 等协议拉流
+ * 使用 Socket.io 进行信令通信。
+ * 支持的协议：RTMP/FLV（FFmpeg 拉流到文件）、HLS/DASH（直接返回播放 URL）；WebRTC 请使用客户端拉流器。
  */
 
 import { Server, type SocketIOSocket } from "@dreamer/socket-io";

@@ -140,6 +140,7 @@ export interface Room {
 
 /**
  * 列表选项
+ * @property filter - 过滤条件。流列表支持 name、roomId、status、protocol；房间列表支持 name、isPrivate
  */
 export interface ListOptions {
   limit?: number;

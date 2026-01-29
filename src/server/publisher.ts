@@ -1,9 +1,17 @@
 /**
  * @fileoverview 服务端推流器实现
  *
- * 使用 Socket.io 进行信令通信，支持 RTMP、HLS 等协议推流
+ * 使用 Socket.io 进行信令通信，支持 RTMP、HLS 等协议推流。
+ * 支持的媒体源：文件路径（string）、Blob、File；Blob/File 会先写入临时文件再推流。
+ * 支持的协议：RTMP/FLV（FFmpeg 推流）、HLS（FFmpeg 转码为 m3u8+ts，通过 getHlsPlaylistPath 获取播放地址）。
  */
 
+import {
+  makeTempDir,
+  makeTempFile,
+  remove,
+  writeFile,
+} from "@dreamer/runtime-adapter";
 import { Server, type SocketIOSocket } from "@dreamer/socket-io";
 import type {
   MediaSource,
@@ -14,7 +22,7 @@ import type {
   VideoQuality,
 } from "../types.ts";
 import { PublisherStateError } from "../utils/errors.ts";
-import { publishWithFFmpeg } from "../utils/ffmpeg.ts";
+import { publishWithFFmpeg, transcodeToHLS } from "../utils/ffmpeg.ts";
 import { detectProtocol } from "../utils/protocol.ts";
 
 /**
@@ -47,7 +55,16 @@ export class ServerPublisher implements Publisher {
   private eventListeners: Map<string, Array<(data?: unknown) => void>> =
     new Map();
   private startTime?: number;
+  /** RTMP/FLV 推流时的 FFmpeg 进程 */
   private ffmpegProcess?: { stop: () => Promise<void> };
+  /** Blob/File 推流时写入的临时文件路径，stop 时删除 */
+  private tempFilePath?: string;
+  /** HLS 推流时的 m3u8 播放列表路径 */
+  private hlsPlaylistPath?: string;
+  /** HLS 转码输出临时目录，stop 时删除 */
+  private hlsTempDir?: string;
+  /** HLS 转码进程，stop 时终止 */
+  private hlsProcess?: { stop: () => Promise<void> };
 
   constructor(options: ServerPublisherOptions) {
     this.streamId = options.streamId;
@@ -105,7 +122,58 @@ export class ServerPublisher implements Publisher {
   }
 
   /**
+   * 将 MediaSource 解析为本地文件路径
+   * 若为 string 则直接返回；若为 Blob/File 则写入临时文件后返回路径，并记录 tempPath 供 stop 时删除
+   *
+   * @param source 媒体源（文件路径、Blob、File）
+   * @returns 本地文件路径及可选的临时路径（需在 stop 时删除）
+   */
+  private async resolveMediaSourceToFilePath(source: MediaSource): Promise<{
+    path: string;
+    tempPath?: string;
+  }> {
+    if (typeof source === "string") {
+      return { path: source };
+    }
+    // Blob 或 File：写入临时文件
+    const blob = source as Blob;
+    const ext = this.getExtensionForBlob(blob);
+    const tempPath = await makeTempFile({ prefix: "stream-", suffix: ext });
+    const arrayBuffer = await blob.arrayBuffer();
+    await writeFile(tempPath, new Uint8Array(arrayBuffer));
+    this.tempFilePath = tempPath;
+    return { path: tempPath, tempPath };
+  }
+
+  /**
+   * 根据 Blob/File 的 type 或 name 推断文件扩展名
+   */
+  private getExtensionForBlob(blob: Blob): string {
+    if (blob instanceof File && blob.name && blob.name.includes(".")) {
+      return blob.name.slice(blob.name.lastIndexOf("."));
+    }
+    const mime = blob.type?.toLowerCase() || "";
+    if (mime.includes("mp4") || mime === "video/mp4") return ".mp4";
+    if (mime.includes("webm")) return ".webm";
+    if (mime.includes("ogg")) return ".ogv";
+    if (mime.includes("quicktime")) return ".mov";
+    return ".mp4";
+  }
+
+  /**
+   * HLS 推流时获取生成的 m3u8 播放列表路径，供应用层通过 HTTP 提供播放
+   *
+   * @returns 播放列表路径，非 HLS 推流或未就绪时为 undefined
+   */
+  getHlsPlaylistPath(): string | undefined {
+    return this.hlsPlaylistPath;
+  }
+
+  /**
    * 开始推流
+   *
+   * 支持媒体源：文件路径（string）、Blob、File。
+   * 支持协议：RTMP/FLV（推流到服务器）、HLS（转码为 m3u8+ts，通过 getHlsPlaylistPath 获取路径后由应用提供 HTTP 播放）。
    */
   async publish(source: MediaSource): Promise<void> {
     if (this.status !== "connected") {
@@ -124,68 +192,80 @@ export class ServerPublisher implements Publisher {
     this.startTime = Date.now();
 
     try {
+      // 服务端不支持 MediaStream（浏览器 API），仅支持文件路径、Blob、File
+      if (
+        typeof source !== "string" &&
+        !(source instanceof Blob)
+      ) {
+        throw new Error(
+          "服务端推流仅支持文件路径、Blob、File；MediaStream 请使用客户端推流器",
+        );
+      }
+      // 将 Blob/File 转为临时文件路径（string 直接使用）
+      const { path: filePath } = await this.resolveMediaSourceToFilePath(
+        source,
+      );
+
       // 通过 Socket.io 发送推流开始信号
       if (this.io) {
-        // 获取默认命名空间并广播推流开始事件
         const namespace = this.io.of("/");
         namespace.emit("stream:publish:start", {
           streamId: this.streamId,
           url: this.url,
-          source: typeof source === "string" ? source : "[MediaSource]",
+          source: typeof source === "string" ? source : "[Blob/File]",
         });
       }
 
-      // 实际推流逻辑
-      if (typeof source === "string") {
-        // 文件路径，使用 FFmpeg 推流
-        const protocol = detectProtocol(this.url);
-        if (protocol === "rtmp") {
-          const process = await publishWithFFmpeg({
-            input: source,
-            output: this.url,
-            quality: this.quality,
-            audioEnabled: this.audioEnabled,
-            videoEnabled: this.videoEnabled,
-            loop: this.loop,
-          });
-          this.ffmpegProcess = process;
+      const protocol = detectProtocol(this.url);
 
-          // 记录流进程到适配器（如果可能）
-          try {
-            const manager = (globalThis as unknown as {
-              __streamManager?: {
-                adapter?: {
-                  recordStreamProcess?: (
-                    streamId: string,
-                    process: unknown,
-                  ) => void;
-                };
+      if (protocol === "rtmp" || protocol === "flv") {
+        const process = await publishWithFFmpeg({
+          input: filePath,
+          output: this.url,
+          quality: this.quality,
+          audioEnabled: this.audioEnabled,
+          videoEnabled: this.videoEnabled,
+          loop: this.loop,
+        });
+        this.ffmpegProcess = process;
+        try {
+          const manager = (globalThis as unknown as {
+            __streamManager?: {
+              adapter?: {
+                recordStreamProcess?: (
+                  streamId: string,
+                  process: unknown,
+                ) => void;
               };
-            }).__streamManager;
-            if (manager?.adapter?.recordStreamProcess) {
-              manager.adapter.recordStreamProcess(this.streamId, process);
-            }
-          } catch {
-            // 忽略错误，这不是关键功能
+            };
+          }).__streamManager;
+          if (manager?.adapter?.recordStreamProcess) {
+            manager.adapter.recordStreamProcess(this.streamId, process);
           }
-        } else if (protocol === "hls") {
-          // HLS 推流需要先转换为 HLS 格式
-          throw new Error("HLS 推流需要先使用 FFmpeg 将流转换为 HLS 格式");
-        } else if (protocol === "webrtc") {
-          // WebRTC 推流需要信令服务器
-          throw new Error(
-            "WebRTC 推流需要信令服务器支持，请使用专门的 WebRTC 适配器",
-          );
-        } else {
-          throw new Error(`协议 ${protocol} 的推流尚未实现`);
+        } catch {
+          // 忽略错误，这不是关键功能
         }
+      } else if (protocol === "hls") {
+        this.hlsTempDir = await makeTempDir({ prefix: "stream-hls-" });
+        const result = await transcodeToHLS(filePath, this.hlsTempDir, {
+          quality: this.quality,
+          loop: this.loop,
+        });
+        this.hlsPlaylistPath = result.playlistPath;
+        this.hlsProcess = result;
+      } else if (protocol === "webrtc") {
+        throw new Error(
+          "WebRTC 推流需要信令服务器支持，请使用专门的 WebRTC 适配器",
+        );
       } else {
-        // MediaStream 或其他类型，需要特殊处理
-        // 可以尝试将 MediaStream 保存为临时文件后推流
-        throw new Error("MediaStream 推流尚未实现，请使用文件路径");
+        throw new Error(`协议 ${protocol} 的推流尚未实现`);
       }
 
-      this.emitEvent("publishing", { streamId: this.streamId, url: this.url });
+      this.emitEvent("publishing", {
+        streamId: this.streamId,
+        url: this.url,
+        hlsPlaylistPath: this.hlsPlaylistPath,
+      });
     } catch (error) {
       this.status = "error";
       this.emitEvent("error", { error, streamId: this.streamId });
@@ -229,9 +309,32 @@ export class ServerPublisher implements Publisher {
         this.io = undefined;
       }
 
-      // 停止 FFmpeg 进程（这可能会卡住，所以放在后面）
+      // 停止 HLS 转码进程并删除临时目录
+      if (this.hlsProcess) {
+        try {
+          await Promise.race([
+            this.hlsProcess.stop(),
+            new Promise((_, reject) => {
+              setTimeout(() => reject(new Error("停止 HLS 超时")), 3000);
+            }),
+          ]);
+        } catch {
+          // ignore
+        }
+        this.hlsProcess = undefined;
+      }
+      if (this.hlsTempDir) {
+        try {
+          await remove(this.hlsTempDir, { recursive: true });
+        } catch {
+          // ignore
+        }
+        this.hlsTempDir = undefined;
+        this.hlsPlaylistPath = undefined;
+      }
+
+      // 停止 RTMP/FLV FFmpeg 进程（这可能会卡住，所以放在后面）
       if (this.ffmpegProcess) {
-        // 添加超时保护，避免卡住
         try {
           await Promise.race([
             this.ffmpegProcess.stop(),
@@ -244,6 +347,16 @@ export class ServerPublisher implements Publisher {
           this.ffmpegProcess = undefined;
         }
         this.ffmpegProcess = undefined;
+      }
+
+      // 删除 Blob/File 推流时创建的临时文件
+      if (this.tempFilePath) {
+        try {
+          await remove(this.tempFilePath);
+        } catch {
+          // ignore
+        }
+        this.tempFilePath = undefined;
       }
 
       // 清理所有事件监听器（防止内存泄漏）

@@ -271,3 +271,128 @@ export async function subscribeWithFFmpeg(
     },
   };
 }
+
+/**
+ * HLS 转码选项
+ */
+export interface TranscodeToHLSOptions {
+  /** 视频质量 */
+  quality?: VideoQuality;
+  /** 是否循环（-stream_loop -1） */
+  loop?: boolean;
+  /** FFmpeg 可执行路径 */
+  ffmpegPath?: string;
+}
+
+/**
+ * 使用 FFmpeg 将输入文件转码为 HLS（m3u8 + ts 分片）
+ *
+ * 输出到指定目录：playlist.m3u8 与 seg_000.ts, seg_001.ts ...
+ * 调用方需负责创建 outputDir（如 makeTempDir）并在用完后删除。
+ *
+ * @param input 输入文件路径
+ * @param outputDir 输出目录（必须已存在）
+ * @param options 可选：质量、循环、ffmpeg 路径
+ * @returns 播放列表路径与进程控制（用于 stop 时终止）
+ */
+export async function transcodeToHLS(
+  input: string,
+  outputDir: string,
+  options?: TranscodeToHLSOptions,
+): Promise<{
+  playlistPath: string;
+  process: unknown;
+  stop: () => Promise<void>;
+}> {
+  const ffmpeg = options?.ffmpegPath || "ffmpeg";
+  const args: string[] = [];
+
+  // 输入
+  if (options?.loop === true) {
+    args.push("-stream_loop", "-1");
+  }
+  args.push("-i", input);
+
+  // 视频
+  args.push("-c:v", "libx264");
+  args.push("-preset", "veryfast");
+  if (options?.quality?.bitrate) {
+    args.push("-b:v", String(options.quality.bitrate));
+  } else {
+    args.push("-b:v", "2000k");
+  }
+  if (options?.quality?.width && options?.quality?.height) {
+    args.push("-s", `${options.quality.width}x${options.quality.height}`);
+  }
+  if (options?.quality?.fps) {
+    args.push("-r", String(options.quality.fps));
+  }
+
+  // 音频
+  args.push("-c:a", "aac");
+  args.push("-b:a", "128k");
+  args.push("-ar", "44100");
+
+  // HLS 输出
+  const playlistPath = `${outputDir.replace(/\/$/, "")}/playlist.m3u8`;
+  const segmentPattern = `${outputDir.replace(/\/$/, "")}/seg_%03d.ts`;
+  args.push("-hls_time", "2");
+  args.push("-hls_list_size", "0");
+  args.push("-hls_segment_filename", segmentPattern);
+  args.push("-f", "hls");
+  args.push(playlistPath);
+
+  const process = createCommand(ffmpeg, {
+    args,
+    stdout: "piped",
+    stderr: "piped",
+  });
+
+  try {
+    await process.spawn();
+  } catch (error) {
+    throw new ConnectionError(
+      `FFmpeg HLS 转码启动失败: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+      error instanceof Error ? error : undefined,
+    );
+  }
+
+  return {
+    playlistPath,
+    process,
+    stop: async () => {
+      try {
+        try {
+          const status = await process.status();
+          if (status.code === null || status.code === undefined) {
+            process.kill(15);
+            try {
+              await Promise.race([
+                process.status(),
+                new Promise((_, reject) => {
+                  setTimeout(() => reject(new Error("进程停止超时")), 2000);
+                }),
+              ]);
+            } catch {
+              try {
+                process.kill(9);
+              } catch {
+                // ignore
+              }
+            }
+          }
+        } catch {
+          try {
+            process.kill(15);
+          } catch {
+            // ignore
+          }
+        }
+      } catch {
+        // ignore
+      }
+    },
+  };
+}

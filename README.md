@@ -3,8 +3,8 @@
 > 一个兼容 Deno 和 Bun 的直播流媒体库，提供完整的直播推流、拉流、管理和处理功能
 
 [![JSR](https://jsr.io/badges/@dreamer/stream)](https://jsr.io/@dreamer/stream)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/tests-119%20passed-brightgreen)](./TEST_REPORT.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.md)
+[![Tests](https://img.shields.io/badge/tests-149%20passed-brightgreen)](./TEST_REPORT.md)
 
 ---
 
@@ -18,6 +18,7 @@
 
 - **推流功能**：
   - 视频文件推流（支持自动循环播放）
+  - 服务端支持文件路径、Blob、File 作为媒体源；HLS 推流通过 FFmpeg 转码为 m3u8+ts（`getHlsPlaylistPath()` 获取播放列表路径）
   - 实时视频流推流
   - 自定义视频质量（分辨率、码率、帧率）
   - 支持音频/视频开关控制
@@ -52,6 +53,7 @@
 - **工具函数**：
   - 协议检测和验证
   - URL 生成（推流、拉流）
+  - FFmpeg 推拉流（`publishWithFFmpeg`、`subscribeWithFFmpeg`）、HLS 转码（`transcodeToHLS`）
   - 状态管理（状态转换验证）
   - ID 生成（流 ID、房间 ID）
   - 缓存（LRU 缓存、流缓存）
@@ -59,6 +61,29 @@
   - 连接池（连接复用）
   - 重连管理（指数退避）
   - 批量操作（批量创建、删除、获取）
+
+---
+
+## 📌 当前支持的适配器与协议
+
+### 适配器
+
+| 适配器 | 说明 | 状态 |
+|--------|------|------|
+| **srs** | SRS (Simple Realtime Server)，推荐，支持 HLS 自动生成 | ✅ 已实现 |
+| **ffmpeg** | 通过 FFmpeg 推拉流，需外部 RTMP 服务器 | ✅ 已实现 |
+| **custom** | 注入自定义 `StreamAdapter` 实现 | ✅ 已实现 |
+| nginx-rtmp / livekit | 计划中 | 📋 后续扩展 |
+
+### 服务端协议建议
+
+- **推流**：支持**文件路径、Blob、File**；推荐 **RTMP/FLV**（FFmpeg 推流）；**HLS** 支持通过 FFmpeg 转码为 m3u8+ts，使用 `getHlsPlaylistPath()` 获取播放列表路径后由应用提供 HTTP 播放；WebRTC/MediaStream 请使用客户端推流器。
+- **拉流**：推荐 **HLS / DASH**（返回播放 URL）；RTMP/FLV 使用 FFmpeg 拉流到文件；WebRTC 拉流建议使用客户端拉流器（需信令服务器）。
+
+### 房间与列表
+
+- **房间**：`createRoom` / `listRooms` 等为**内存存储**，不与 SRS/FFmpeg 同步，进程重启后丢失。
+- **列表过滤**：`listStreams(options)` 和 `listRooms(options)` 支持 `options.filter`。流支持 `name`、`roomId`、`status`、`protocol`；房间支持 `name`、`isPrivate`。
 
 ---
 

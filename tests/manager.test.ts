@@ -2,7 +2,7 @@
  * @fileoverview 流管理器测试
  */
 
-import { describe, expect, it, assertRejects } from "@dreamer/test";
+import { assertRejects, describe, expect, it } from "@dreamer/test";
 import { StreamManager } from "../src/manager.ts";
 
 describe("StreamManager", () => {
@@ -155,5 +155,41 @@ describe("StreamManager", () => {
       Error,
       "不支持的适配器类型",
     );
+  });
+
+  it("应该支持 listStreams 的 filter（name、roomId、status、protocol）", async () => {
+    const manager = new StreamManager({ adapter: "ffmpeg" });
+    await manager.createStream({ name: "流A", protocol: "rtmp", roomId: "r1" });
+    await manager.createStream({ name: "流B", protocol: "rtmp", roomId: "r2" });
+    await manager.createStream({ name: "流A", protocol: "rtmp", roomId: "r1" });
+
+    const byName = await manager.listStreams({ filter: { name: "流A" } });
+    expect(byName.length).toBe(2);
+    expect(byName.every((s) => s.name === "流A")).toBe(true);
+
+    const byRoomId = await manager.listStreams({ filter: { roomId: "r1" } });
+    expect(byRoomId.length).toBe(2);
+    expect(byRoomId.every((s) => s.roomId === "r1")).toBe(true);
+
+    const byProtocol = await manager.listStreams({
+      filter: { protocol: "rtmp" },
+    });
+    expect(byProtocol.length).toBe(3);
+    expect(byProtocol.every((s) => s.protocol === "rtmp")).toBe(true);
+  });
+
+  it("应该支持 listRooms 的 filter（name、isPrivate）", async () => {
+    const manager = new StreamManager({ adapter: "ffmpeg" });
+    await manager.createRoom({ name: "公开房", isPrivate: false });
+    await manager.createRoom({ name: "私密房", isPrivate: true });
+    await manager.createRoom({ name: "公开房", isPrivate: false });
+
+    const byName = await manager.listRooms({ filter: { name: "公开房" } });
+    expect(byName.length).toBe(2);
+    expect(byName.every((r) => r.name === "公开房")).toBe(true);
+
+    const byPrivate = await manager.listRooms({ filter: { isPrivate: true } });
+    expect(byPrivate.length).toBe(1);
+    expect(byPrivate[0].name).toBe("私密房");
   });
 });
