@@ -75,6 +75,11 @@ export {
 // 导出适配器
 export type { AdapterOptions, StreamAdapter } from "./adapters/base.ts";
 export { FFmpegAdapter, type FFmpegAdapterConfig } from "./adapters/ffmpeg.ts";
+export { LiveKitAdapter, type LiveKitAdapterConfig } from "./adapters/livekit.ts";
+export {
+  NginxRtmpAdapter,
+  type NginxRtmpAdapterConfig,
+} from "./adapters/nginx-rtmp.ts";
 export { SRSAdapter, type SRSAdapterConfig } from "./adapters/srs.ts";
 
 // 导出服务端推流和拉流

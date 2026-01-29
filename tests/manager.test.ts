@@ -157,6 +157,85 @@ describe("StreamManager", () => {
     );
   });
 
+  it("应该支持 nginx-rtmp 适配器（mock stat）", async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = () =>
+      Promise.resolve(
+        new Response(
+          '<?xml version="1.0"?><rtmp><server><application><name>live</name><live><stream><name>test</name></stream></live></application></server></rtmp>',
+          { status: 200 },
+        ),
+      );
+    try {
+      const manager = new StreamManager({
+        adapter: "nginx-rtmp",
+        adapterConfig: {
+          config: {
+            statUrl: "http://localhost:80/stat",
+            host: "localhost",
+            rtmpPort: 1935,
+            httpPort: 80,
+            app: "live",
+          },
+        },
+      });
+      const stream = await manager.createStream({
+        name: "nginx-stream",
+        protocol: "rtmp",
+      });
+      expect(stream.id).toBe("nginx-stream");
+      expect(stream.publisherUrl).toContain("rtmp://");
+      const retrieved = await manager.getStream(stream.id);
+      expect(retrieved?.id).toBe("nginx-stream");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  it("应该支持 livekit 适配器（mock API）", async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (input: RequestInfo | URL) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.includes("CreateRoom")) {
+        return Promise.resolve(
+          new Response(JSON.stringify({ room: { name: "lk-room" } }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+        );
+      }
+      if (url.includes("ListRooms")) {
+        return Promise.resolve(
+          new Response(JSON.stringify({ rooms: [] }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+        );
+      }
+      return Promise.resolve(new Response("{}", { status: 200 }));
+    };
+    try {
+      const manager = new StreamManager({
+        adapter: "livekit",
+        adapterConfig: {
+          config: {
+            host: "http://localhost:7880",
+            apiKey: "key",
+            apiSecret: "secret",
+          },
+        },
+      });
+      const stream = await manager.createStream({
+        name: "lk-room",
+        protocol: "webrtc",
+      });
+      expect(stream.id).toBe("lk-room");
+      expect(stream.protocol).toBe("webrtc");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   it("应该支持 listStreams 的 filter（name、roomId、status、protocol）", async () => {
     const manager = new StreamManager({ adapter: "ffmpeg" });
     await manager.createStream({ name: "流A", protocol: "rtmp", roomId: "r1" });

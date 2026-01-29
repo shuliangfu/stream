@@ -9,6 +9,14 @@
 
 import type { AdapterOptions, StreamAdapter } from "./adapters/base.ts";
 import { FFmpegAdapter, type FFmpegAdapterConfig } from "./adapters/ffmpeg.ts";
+import {
+  LiveKitAdapter,
+  type LiveKitAdapterConfig,
+} from "./adapters/livekit.ts";
+import {
+  NginxRtmpAdapter,
+  type NginxRtmpAdapterConfig,
+} from "./adapters/nginx-rtmp.ts";
 import { SRSAdapter, type SRSAdapterConfig } from "./adapters/srs.ts";
 import type {
   ListOptions,
@@ -25,15 +33,19 @@ import type {
 
 /**
  * 当前支持的适配器类型
- * @description 仅支持 srs | ffmpeg | custom，后续可能扩展 nginx-rtmp、livekit
  */
-export type SupportedAdapterType = "srs" | "ffmpeg" | "custom";
+export type SupportedAdapterType =
+  | "srs"
+  | "ffmpeg"
+  | "nginx-rtmp"
+  | "livekit"
+  | "custom";
 
 /**
  * 流管理器选项
  */
 export interface StreamManagerOptions {
-  /** 适配器类型（当前支持: srs、ffmpeg、custom） */
+  /** 适配器类型（srs、ffmpeg、nginx-rtmp、livekit、custom） */
   adapter: SupportedAdapterType;
   /** 适配器配置 */
   adapterConfig?: AdapterOptions;
@@ -71,6 +83,10 @@ export class StreamManager {
         return new FFmpegAdapter(config as FFmpegAdapterConfig);
       case "srs":
         return new SRSAdapter(config as SRSAdapterConfig);
+      case "nginx-rtmp":
+        return new NginxRtmpAdapter(config as NginxRtmpAdapterConfig);
+      case "livekit":
+        return new LiveKitAdapter(config as LiveKitAdapterConfig);
       case "custom":
         if (!options.adapterConfig?.adapter) {
           throw new Error("custom 适配器需要提供 adapter 实现");
