@@ -98,17 +98,18 @@ export async function recordStream(
   // 输出文件
   args.push("-y", outputPath);
 
-  // 创建 FFmpeg 进程
-  const process = createCommand(ffmpeg, {
+  // 创建 FFmpeg 命令对象
+  const cmd = createCommand(ffmpeg, {
     args,
     stdout: "piped",
     stderr: "piped",
   });
 
-  // 启动进程
+  // 启动进程（spawn 是同步方法，返回 SpawnedProcess）
   try {
-    await process.spawn();
-    await process.status();
+    const child = cmd.spawn();
+    // 等待进程完成（status 是属性，不是方法）
+    await child.status;
 
     // 获取文件信息
     const { stat } = await import("@dreamer/runtime-adapter");
@@ -187,16 +188,17 @@ export async function recordStreamRealtime(
   // 输出文件
   args.push("-y", outputPath);
 
-  // 创建 FFmpeg 进程
-  const process = createCommand(ffmpeg, {
+  // 创建 FFmpeg 命令对象
+  const cmd = createCommand(ffmpeg, {
     args,
     stdout: "piped",
     stderr: "piped",
   });
 
-  // 启动进程
+  // 启动进程（spawn 是同步方法，返回 SpawnedProcess）
+  let child;
   try {
-    await process.spawn();
+    child = cmd.spawn();
   } catch (error) {
     throw new ConnectionError(
       `FFmpeg 录制启动失败: ${
@@ -208,13 +210,14 @@ export async function recordStreamRealtime(
 
   // 返回进程和控制函数
   return {
-    process,
+    process: child,
     outputPath,
     stop: async () => {
       try {
         // kill 方法接受数字信号（15 = SIGTERM）
-        process.kill(15);
-        await process.status();
+        child.kill(15);
+        // 等待进程结束（status 是属性，不是方法）
+        await child.status;
       } catch (error) {
         console.warn("停止 FFmpeg 录制进程时出错:", error);
       }

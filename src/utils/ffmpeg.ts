@@ -111,16 +111,17 @@ export async function publishWithFFmpeg(
   // 输出 URL
   args.push(options.output);
 
-  // 创建 FFmpeg 进程
-  const process = createCommand(ffmpeg, {
+  // 创建 FFmpeg 命令对象
+  const cmd = createCommand(ffmpeg, {
     args,
     stdout: "piped",
     stderr: "piped",
   });
 
-  // 启动进程
+  // 启动进程（spawn 是同步方法，返回 SpawnedProcess）
+  let child;
   try {
-    await process.spawn();
+    child = cmd.spawn();
   } catch (error) {
     throw new ConnectionError(
       `FFmpeg 推流启动失败: ${
@@ -132,41 +133,30 @@ export async function publishWithFFmpeg(
 
   // 返回进程和控制函数
   return {
-    process,
+    process: child,
     stop: async () => {
       try {
-        // 先检查进程状态
+        // 尝试终止进程
         try {
-          const status = await process.status();
-          // 如果进程还在运行，则终止它
-          if (status.code === null || status.code === undefined) {
-            process.kill(15); // SIGTERM
-            // 等待进程结束（添加超时）
+          child.kill(15); // SIGTERM
+          // 等待进程结束（添加超时）
+          try {
+            await Promise.race([
+              child.status,
+              new Promise((_, reject) => {
+                setTimeout(() => reject(new Error("进程停止超时")), 2000);
+              }),
+            ]);
+          } catch {
+            // 如果超时，强制终止
             try {
-              await Promise.race([
-                process.status(),
-                new Promise((_, reject) => {
-                  setTimeout(() => reject(new Error("进程停止超时")), 2000);
-                }),
-              ]);
+              child.kill(9); // SIGKILL
             } catch {
-              // 如果超时，强制终止
-              try {
-                process.kill(9); // SIGKILL
-              } catch {
-                // 忽略强制终止错误
-              }
+              // 忽略强制终止错误
             }
           }
-          // 如果进程已经结束（status.code 不为 null），无需处理
         } catch {
-          // 如果获取状态失败，说明进程可能已经结束
-          // 尝试终止进程（可能会失败，但这是预期的）
-          try {
-            process.kill(15);
-          } catch {
-            // 忽略终止错误（进程可能已经结束）
-          }
+          // 如果终止失败，说明进程可能已经结束，忽略错误
         }
       } catch {
         // 忽略所有停止时的错误（进程可能已经自然结束）
@@ -207,16 +197,17 @@ export async function subscribeWithFFmpeg(
   // 输出文件
   args.push("-y", options.output);
 
-  // 创建 FFmpeg 进程
-  const process = createCommand(ffmpeg, {
+  // 创建 FFmpeg 命令对象
+  const cmd = createCommand(ffmpeg, {
     args,
     stdout: "piped",
     stderr: "piped",
   });
 
-  // 启动进程
+  // 启动进程（spawn 是同步方法，返回 SpawnedProcess）
+  let child;
   try {
-    await process.spawn();
+    child = cmd.spawn();
   } catch (error) {
     throw new ConnectionError(
       `FFmpeg 拉流启动失败: ${
@@ -228,41 +219,30 @@ export async function subscribeWithFFmpeg(
 
   // 返回进程和控制函数
   return {
-    process,
+    process: child,
     stop: async () => {
       try {
-        // 先检查进程状态
+        // 尝试终止进程
         try {
-          const status = await process.status();
-          // 如果进程还在运行，则终止它
-          if (status.code === null || status.code === undefined) {
-            process.kill(15); // SIGTERM
-            // 等待进程结束（添加超时）
+          child.kill(15); // SIGTERM
+          // 等待进程结束（添加超时）
+          try {
+            await Promise.race([
+              child.status,
+              new Promise((_, reject) => {
+                setTimeout(() => reject(new Error("进程停止超时")), 2000);
+              }),
+            ]);
+          } catch {
+            // 如果超时，强制终止
             try {
-              await Promise.race([
-                process.status(),
-                new Promise((_, reject) => {
-                  setTimeout(() => reject(new Error("进程停止超时")), 2000);
-                }),
-              ]);
+              child.kill(9); // SIGKILL
             } catch {
-              // 如果超时，强制终止
-              try {
-                process.kill(9); // SIGKILL
-              } catch {
-                // 忽略强制终止错误
-              }
+              // 忽略强制终止错误
             }
           }
-          // 如果进程已经结束（status.code 不为 null），无需处理
         } catch {
-          // 如果获取状态失败，说明进程可能已经结束
-          // 尝试终止进程（可能会失败，但这是预期的）
-          try {
-            process.kill(15);
-          } catch {
-            // 忽略终止错误（进程可能已经结束）
-          }
+          // 如果终止失败，说明进程可能已经结束，忽略错误
         }
       } catch {
         // 忽略所有停止时的错误（进程可能已经自然结束）
@@ -342,14 +322,17 @@ export async function transcodeToHLS(
   args.push("-f", "hls");
   args.push(playlistPath);
 
-  const process = createCommand(ffmpeg, {
+  // 创建 FFmpeg 命令对象
+  const cmd = createCommand(ffmpeg, {
     args,
     stdout: "piped",
     stderr: "piped",
   });
 
+  // 启动进程（spawn 是同步方法，返回 SpawnedProcess）
+  let child;
   try {
-    await process.spawn();
+    child = cmd.spawn();
   } catch (error) {
     throw new ConnectionError(
       `FFmpeg HLS 转码启动失败: ${
@@ -361,34 +344,28 @@ export async function transcodeToHLS(
 
   return {
     playlistPath,
-    process,
+    process: child,
     stop: async () => {
       try {
+        // 尝试终止进程
         try {
-          const status = await process.status();
-          if (status.code === null || status.code === undefined) {
-            process.kill(15);
+          child.kill(15); // SIGTERM
+          try {
+            await Promise.race([
+              child.status,
+              new Promise((_, reject) => {
+                setTimeout(() => reject(new Error("进程停止超时")), 2000);
+              }),
+            ]);
+          } catch {
             try {
-              await Promise.race([
-                process.status(),
-                new Promise((_, reject) => {
-                  setTimeout(() => reject(new Error("进程停止超时")), 2000);
-                }),
-              ]);
+              child.kill(9); // SIGKILL
             } catch {
-              try {
-                process.kill(9);
-              } catch {
-                // ignore
-              }
+              // ignore
             }
           }
         } catch {
-          try {
-            process.kill(15);
-          } catch {
-            // ignore
-          }
+          // 如果终止失败，说明进程可能已经结束，忽略错误
         }
       } catch {
         // ignore
