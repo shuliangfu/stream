@@ -75,7 +75,10 @@ export {
 // 导出适配器
 export type { AdapterOptions, StreamAdapter } from "./adapters/base.ts";
 export { FFmpegAdapter, type FFmpegAdapterConfig } from "./adapters/ffmpeg.ts";
-export { LiveKitAdapter, type LiveKitAdapterConfig } from "./adapters/livekit.ts";
+export {
+  LiveKitAdapter,
+  type LiveKitAdapterConfig,
+} from "./adapters/livekit.ts";
 export {
   NginxRtmpAdapter,
   type NginxRtmpAdapterConfig,

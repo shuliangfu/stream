@@ -4,15 +4,15 @@
 
 import { describe, expect, it } from "@dreamer/test";
 import {
+  clearProtocolCache,
   detectProtocol,
-  validateProtocol,
-  parseRtmpUrl,
-  parseHlsUrl,
   getDefaultPort,
+  parseHlsUrl,
+  parseRtmpUrl,
+  SUPPORTED_PROTOCOLS,
   supportsPublishing,
   supportsSubscribing,
-  clearProtocolCache,
-  SUPPORTED_PROTOCOLS,
+  validateProtocol,
 } from "../../src/utils/protocol.ts";
 import { ProtocolNotSupportedError } from "../../src/utils/errors.ts";
 

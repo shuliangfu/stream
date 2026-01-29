@@ -3,7 +3,11 @@
  */
 
 import { describe, expect, it } from "@dreamer/test";
-import { generateId, generateStreamId, generateRoomId } from "../../src/utils/id.ts";
+import {
+  generateId,
+  generateRoomId,
+  generateStreamId,
+} from "../../src/utils/id.ts";
 
 describe("generateId", () => {
   it("应该生成带前缀的 ID", () => {

@@ -4,12 +4,12 @@
 
 import { describe, expect, it } from "@dreamer/test";
 import {
-  generateRtmpUrl,
-  generateHlsUrl,
   generateFlvUrl,
-  generateWebRtcUrl,
+  generateHlsUrl,
   generatePublisherUrl,
+  generateRtmpUrl,
   generateSubscriberUrl,
+  generateWebRtcUrl,
 } from "../../src/utils/url.ts";
 
 describe("generateRtmpUrl", () => {

@@ -92,7 +92,8 @@ describe("流生命周期", () => {
     const remaining = await manager.listStreams();
     expect(
       remaining.some(
-        (s) => s.id === stream1.id || s.id === stream2.id || s.id === stream3.id,
+        (s) =>
+          s.id === stream1.id || s.id === stream2.id || s.id === stream3.id,
       ),
     ).toBe(false);
   });

@@ -26,22 +26,26 @@ tests/
 ## 运行测试
 
 ### 运行所有测试
+
 ```bash
 deno test tests/
 ```
 
 ### 运行特定测试文件
+
 ```bash
 deno test tests/utils/errors.test.ts
 ```
 
 ### 运行测试并显示覆盖率
+
 ```bash
 deno test --coverage=cov_profile tests/
 deno coverage cov_profile
 ```
 
 ### 运行测试并监听文件变化
+
 ```bash
 deno test --watch tests/
 ```

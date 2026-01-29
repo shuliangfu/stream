@@ -89,7 +89,7 @@ export class ReconnectManager {
       this.attempts = 0;
       this.options.onReconnect?.(this.attempts);
       return result;
-    } catch (error) {
+    } catch (_error) {
       // 连接失败，继续重连
       return this.reconnect(connectFn);
     }

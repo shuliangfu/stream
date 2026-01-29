@@ -4,10 +4,10 @@
 
 import { describe, expect, it } from "@dreamer/test";
 import {
-  batchProcess,
   batchCreateStreams,
   batchDeleteStreams,
   batchGetStreams,
+  batchProcess,
 } from "../../src/utils/batch-operations.ts";
 
 describe("batchProcess", () => {

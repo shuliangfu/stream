@@ -4,15 +4,15 @@
 
 import { describe, expect, it } from "@dreamer/test";
 import {
-  StreamError,
-  StreamNotFoundError,
-  StreamAlreadyExistsError,
-  PublisherStateError,
-  SubscriberStateError,
-  ConnectionError,
-  ProtocolNotSupportedError,
   AdapterError,
   ConfigurationError,
+  ConnectionError,
+  ProtocolNotSupportedError,
+  PublisherStateError,
+  StreamAlreadyExistsError,
+  StreamError,
+  StreamNotFoundError,
+  SubscriberStateError,
 } from "../../src/utils/errors.ts";
 
 describe("StreamError", () => {

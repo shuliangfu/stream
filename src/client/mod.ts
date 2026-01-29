@@ -5,4 +5,7 @@
  */
 
 export { ClientPublisher, type ClientPublisherOptions } from "./publisher.ts";
-export { ClientSubscriber, type ClientSubscriberOptions } from "./subscriber.ts";
+export {
+  ClientSubscriber,
+  type ClientSubscriberOptions,
+} from "./subscriber.ts";

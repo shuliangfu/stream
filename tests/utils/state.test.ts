@@ -4,14 +4,14 @@
 
 import { describe, expect, it } from "@dreamer/test";
 import {
-  isValidStreamTransition,
-  isValidPublisherTransition,
-  isValidSubscriberTransition,
-  getStreamStatusName,
   getPublisherStatusName,
+  getStreamStatusName,
   getSubscriberStatusName,
   isActiveStatus,
   isErrorStatus,
+  isValidPublisherTransition,
+  isValidStreamTransition,
+  isValidSubscriberTransition,
 } from "../../src/utils/state.ts";
 
 describe("isValidStreamTransition", () => {

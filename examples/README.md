@@ -6,7 +6,8 @@
 
 **⚠️ 需要先启动 RTMP 服务器**
 
-此示例使用 FFmpeg 适配器，但需要先启动一个 RTMP 服务器（如 SRS 或 nginx-rtmp）才能正常工作。
+此示例使用 FFmpeg 适配器，但需要先启动一个 RTMP 服务器（如 SRS 或
+nginx-rtmp）才能正常工作。
 
 **启动 SRS 服务器（推荐）：**
 
@@ -61,6 +62,7 @@ bun run examples/video-file-publish.ts
 此示例使用 SRS 适配器，会自动连接到已运行的 SRS 服务器，并生成 HLS 播放地址。
 
 **前提条件：**
+
 - 需要先启动 SRS 服务器（见上方）
 
 **运行示例：**
@@ -74,6 +76,7 @@ bun run examples/video-file-publish-srs.ts
 ```
 
 **优势：**
+
 - 自动生成 HLS 播放地址，可在浏览器中直接播放
 - 支持多种播放协议（RTMP、HLS、FLV、WebRTC）
 - 更好的流管理和统计功能
@@ -96,13 +99,16 @@ vlc rtmp://localhost:1935/live/stream-xxx
 ### 在浏览器中播放 HLS 流（使用 SRS 适配器）
 
 打开浏览器访问：
+
 ```
 http://localhost:8080/live/stream-xxx/playlist.m3u8
 ```
 
 或在 HTML 中使用：
+
 ```html
-<video src="http://localhost:8080/live/stream-xxx/playlist.m3u8" controls></video>
+<video src="http://localhost:8080/live/stream-xxx/playlist.m3u8" controls>
+</video>
 ```
 
 ## 常见问题
@@ -116,11 +122,13 @@ http://localhost:8080/live/stream-xxx/playlist.m3u8
 ### 2. 推流失败
 
 **原因：**
+
 - RTMP 服务器未启动
 - 推流地址不正确
 - 视频文件不存在
 
 **解决：**
+
 - 检查 SRS 服务器是否运行：`docker ps | grep srs`
 - 检查推流地址是否正确
 - 确认视频文件路径正确
@@ -128,11 +136,13 @@ http://localhost:8080/live/stream-xxx/playlist.m3u8
 ### 3. 无法播放流
 
 **原因：**
+
 - 推流还未开始
 - 播放地址不正确
 - RTMP 服务器未运行
 
 **解决：**
+
 - 等待推流开始后再播放
 - 使用示例输出的播放地址
 - 确保 RTMP 服务器正在运行

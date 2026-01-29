@@ -17,7 +17,7 @@ import type {
 } from "../types.ts";
 import { generateId } from "../utils/id.ts";
 import type { StreamAdapter } from "./base.ts";
-import { StreamNotFoundError, ConnectionError } from "../utils/errors.ts";
+import { ConnectionError, StreamNotFoundError } from "../utils/errors.ts";
 
 /**
  * LiveKit 适配器配置
@@ -101,7 +101,9 @@ async function callLiveKitApi(
   method: string,
   body: Record<string, unknown> = {},
 ): Promise<unknown> {
-  const url = `${baseUrl.replace(/\/$/, "")}/twirp/livekit.RoomService/${method}`;
+  const url = `${
+    baseUrl.replace(/\/$/, "")
+  }/twirp/livekit.RoomService/${method}`;
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -267,7 +269,12 @@ export class LiveKitAdapter implements StreamAdapter {
   ): Promise<Stream[]> {
     try {
       const token = await this.getToken();
-      const res = await callLiveKitApi(this.baseUrl, token, "ListRooms", {}) as {
+      const res = await callLiveKitApi(
+        this.baseUrl,
+        token,
+        "ListRooms",
+        {},
+      ) as {
         rooms?: LiveKitRoom[];
       };
       const wsProtocol = this.baseUrl.startsWith("https") ? "wss" : "ws";

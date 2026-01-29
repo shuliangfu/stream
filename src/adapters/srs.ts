@@ -15,10 +15,10 @@ import type {
   Subscriber,
   SubscriberOptions,
 } from "../types.ts";
+import { ConnectionError, StreamNotFoundError } from "../utils/errors.ts";
 import { generateId } from "../utils/id.ts";
 import { generatePublisherUrl, generateSubscriberUrl } from "../utils/url.ts";
 import type { StreamAdapter } from "./base.ts";
-import { StreamNotFoundError, ConnectionError } from "../utils/errors.ts";
 
 /**
  * SRS 适配器配置
@@ -208,7 +208,7 @@ export class SRSAdapter implements StreamAdapter {
       await this.callApi(`/api/v1/streams/${streamKey}`, {
         method: "DELETE",
       });
-    } catch (error) {
+    } catch (_error) {
       // 忽略错误，流可能已经不存在
     }
 
@@ -236,7 +236,7 @@ export class SRSAdapter implements StreamAdapter {
           stream.status = "publishing";
         }
       }
-    } catch (error) {
+    } catch (_error) {
       // 忽略错误，使用本地流信息
     }
 
@@ -273,7 +273,7 @@ export class SRSAdapter implements StreamAdapter {
           }
         }
       }
-    } catch (error) {
+    } catch (_error) {
       // 忽略错误，返回本地流列表
     }
 
@@ -354,7 +354,7 @@ export class SRSAdapter implements StreamAdapter {
           uptime: 0,
         };
       }
-    } catch (error) {
+    } catch (_error) {
       // 返回默认统计信息
     }
 

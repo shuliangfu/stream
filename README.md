@@ -32,13 +32,13 @@ bunx jsr add @dreamer/stream
 
 ## 🌍 环境兼容性
 
-| 环境 | 版本要求 | 状态 |
-|------|---------|------|
-| **Deno** | 2.5+ | ✅ 完全支持 |
-| **Bun** | 1.0+ | ✅ 完全支持 |
-| **服务端** | - | ✅ 支持（兼容 Deno 和 Bun 运行时，支持 SRS 和 FFmpeg 适配器） |
-| **客户端** | - | ✅ 支持（浏览器环境，通过 `jsr:@dreamer/stream/client` 使用客户端推拉流） |
-| **依赖** | - | 📦 SRS 适配器需要 SRS 服务器（可选）<br>📦 FFmpeg 适配器需要 FFmpeg 和外部 RTMP 服务器（可选）<br>📦 nginx-rtmp 适配器需要 nginx-rtmp-module 与 /stat（可选）<br>📦 LiveKit 适配器需要 LiveKit 服务与 apiKey/apiSecret（可选） |
+| 环境       | 版本要求 | 状态                                                                                                                                                                                                                           |
+| ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Deno**   | 2.5+     | ✅ 完全支持                                                                                                                                                                                                                    |
+| **Bun**    | 1.0+     | ✅ 完全支持                                                                                                                                                                                                                    |
+| **服务端** | -        | ✅ 支持（兼容 Deno 和 Bun 运行时，支持 SRS 和 FFmpeg 适配器）                                                                                                                                                                  |
+| **客户端** | -        | ✅ 支持（浏览器环境，通过 `jsr:@dreamer/stream/client` 使用客户端推拉流）                                                                                                                                                      |
+| **依赖**   | -        | 📦 SRS 适配器需要 SRS 服务器（可选）<br>📦 FFmpeg 适配器需要 FFmpeg 和外部 RTMP 服务器（可选）<br>📦 nginx-rtmp 适配器需要 nginx-rtmp-module 与 /stat（可选）<br>📦 LiveKit 适配器需要 LiveKit 服务与 apiKey/apiSecret（可选） |
 
 ---
 
@@ -46,7 +46,8 @@ bunx jsr add @dreamer/stream
 
 - **推流功能**：
   - 视频文件推流（支持自动循环播放）
-  - 服务端支持文件路径、Blob、File 作为媒体源；HLS 推流通过 FFmpeg 转码为 m3u8+ts（`getHlsPlaylistPath()` 获取播放列表路径）
+  - 服务端支持文件路径、Blob、File 作为媒体源；HLS 推流通过 FFmpeg 转码为
+    m3u8+ts（`getHlsPlaylistPath()` 获取播放列表路径）
   - 实时视频流推流
   - 自定义视频质量（分辨率、码率、帧率）
   - 支持音频/视频开关控制
@@ -82,7 +83,8 @@ bunx jsr add @dreamer/stream
 - **工具函数**：
   - 协议检测和验证
   - URL 生成（推流、拉流）
-  - FFmpeg 推拉流（`publishWithFFmpeg`、`subscribeWithFFmpeg`）、HLS 转码（`transcodeToHLS`）
+  - FFmpeg 推拉流（`publishWithFFmpeg`、`subscribeWithFFmpeg`）、HLS
+    转码（`transcodeToHLS`）
   - 状态管理（状态转换验证）
   - ID 生成（流 ID、房间 ID）
   - 缓存（LRU 缓存、流缓存）
@@ -97,34 +99,42 @@ bunx jsr add @dreamer/stream
 
 ### 适配器
 
-| 适配器 | 说明 | 状态 |
-|--------|------|------|
-| **srs** | SRS (Simple Realtime Server)，推荐，支持 HLS 自动生成 | ✅ 已实现 |
-| **ffmpeg** | 通过 FFmpeg 推拉流，需外部 RTMP 服务器 | ✅ 已实现 |
-| **nginx-rtmp** | nginx-rtmp-module，通过 /stat 获取流列表，推拉流用 RTMP/HLS/FLV | ✅ 已实现 |
-| **livekit** | LiveKit Room 映射为流，需 apiKey/apiSecret，推拉流需配合 LiveKit SDK + token | ✅ 已实现 |
-| **custom** | 注入自定义 `StreamAdapter` 实现 | ✅ 已实现 |
+| 适配器         | 说明                                                                         | 状态      |
+| -------------- | ---------------------------------------------------------------------------- | --------- |
+| **srs**        | SRS (Simple Realtime Server)，推荐，支持 HLS 自动生成                        | ✅ 已实现 |
+| **ffmpeg**     | 通过 FFmpeg 推拉流，需外部 RTMP 服务器                                       | ✅ 已实现 |
+| **nginx-rtmp** | nginx-rtmp-module，通过 /stat 获取流列表，推拉流用 RTMP/HLS/FLV              | ✅ 已实现 |
+| **livekit**    | LiveKit Room 映射为流，需 apiKey/apiSecret，推拉流需配合 LiveKit SDK + token | ✅ 已实现 |
+| **custom**     | 注入自定义 `StreamAdapter` 实现                                              | ✅ 已实现 |
 
 ### 服务端协议建议
 
-- **推流**：支持**文件路径、Blob、File**；推荐 **RTMP/FLV**（FFmpeg 推流）；**HLS** 支持通过 FFmpeg 转码为 m3u8+ts，使用 `getHlsPlaylistPath()` 获取播放列表路径后由应用提供 HTTP 播放；WebRTC/MediaStream 请使用客户端推流器。
-- **拉流**：推荐 **HLS / DASH**（返回播放 URL）；RTMP/FLV 使用 FFmpeg 拉流到文件；WebRTC 拉流建议使用客户端拉流器（需信令服务器）。
+- **推流**：支持**文件路径、Blob、File**；推荐 **RTMP/FLV**（FFmpeg
+  推流）；**HLS** 支持通过 FFmpeg 转码为 m3u8+ts，使用 `getHlsPlaylistPath()`
+  获取播放列表路径后由应用提供 HTTP 播放；WebRTC/MediaStream
+  请使用客户端推流器。
+- **拉流**：推荐 **HLS / DASH**（返回播放 URL）；RTMP/FLV 使用 FFmpeg
+  拉流到文件；WebRTC 拉流建议使用客户端拉流器（需信令服务器）。
 
 ### 房间与列表
 
-- **房间**：`createRoom` / `listRooms` 等为**内存存储**，不与 SRS/FFmpeg 同步，进程重启后丢失。
-- **列表过滤**：`listStreams(options)` 和 `listRooms(options)` 支持 `options.filter`。流支持 `name`、`roomId`、`status`、`protocol`；房间支持 `name`、`isPrivate`。
+- **房间**：`createRoom` / `listRooms` 等为**内存存储**，不与 SRS/FFmpeg
+  同步，进程重启后丢失。
+- **列表过滤**：`listStreams(options)` 和 `listRooms(options)` 支持
+  `options.filter`。流支持 `name`、`roomId`、`status`、`protocol`；房间支持
+  `name`、`isPrivate`。
 
 ---
 
 ## 🎨 设计原则
 
-**所有 @dreamer/* 库都遵循以下原则**：
+__所有 @dreamer/_ 库都遵循以下原则_*：
 
 - **主包（@dreamer/xxx）**：用于服务端（兼容 Deno 和 Bun 运行时）
 - **客户端子包（@dreamer/xxx/client）**：用于客户端（浏览器环境）
 
 这样可以：
+
 - 明确区分服务端和客户端代码
 - 避免在客户端代码中引入服务端依赖
 - 提供更好的类型安全和代码提示
@@ -360,9 +370,11 @@ await manager.deleteStream(stream.id);
 流管理器，提供统一的流和房间管理接口。
 
 **构造函数**：
+
 - `new StreamManager(options: StreamManagerOptions)`: 创建流管理器
 
 **方法**：
+
 - `connect()`: 连接到服务器（SRS 适配器需要）
 - `disconnect()`: 断开连接
 - `createStream(options: StreamOptions)`: 创建流
@@ -384,12 +396,14 @@ await manager.deleteStream(stream.id);
 推流器，用于将视频流推送到流媒体服务器。
 
 **方法**：
+
 - `connect(url: string, options?: PublisherOptions)`: 连接到推流服务器
 - `publish(source: MediaSource)`: 开始推流
 - `stop()`: 停止推流
 - `setVideoQuality(quality: VideoQuality)`: 设置视频质量
 
 **事件**：
+
 - `connecting`: 连接中
 - `connected`: 已连接
 - `publishing`: 推流中
@@ -401,11 +415,13 @@ await manager.deleteStream(stream.id);
 拉流器，用于从流媒体服务器拉取视频流。
 
 **方法**：
+
 - `connect(url: string, options?: SubscriberOptions)`: 连接到拉流服务器
 - `play()`: 开始播放
 - `stop()`: 停止播放
 
 **事件**：
+
 - `connecting`: 连接中
 - `connected`: 已连接
 - `playing`: 播放中
@@ -459,6 +475,7 @@ interface StreamAdapter {
 SRS 适配器，通过 SRS HTTP API 管理流。
 
 **选项**：
+
 - `host?: string`: SRS 服务器地址（默认：localhost）
 - `rtmpPort?: number`: RTMP 端口（默认：1935）
 - `httpPort?: number`: HTTP 端口（默认：8080）
@@ -471,6 +488,7 @@ SRS 适配器，通过 SRS HTTP API 管理流。
 FFmpeg 适配器，使用 FFmpeg 进行推流。
 
 **选项**：
+
 - `host?: string`: RTMP 服务器地址（默认：localhost）
 - `port?: number`: RTMP 端口（默认：1935）
 - `app?: string`: 应用名称（默认：live）
@@ -508,15 +526,16 @@ docker run -d \
 
 **图例**：✅ 直接支持；⚠️ 有条件/间接支持（见下表说明）。
 
-| 协议 | 推流 | 拉流 | 说明 |
-|------|------|------|------|
-| RTMP | ✅ | ✅ | 实时消息传输协议；服务端可直接推 RTMP，最常用 |
-| HLS | ⚠️ | ✅ | HTTP 直播流；推流通过 FFmpeg 转码为 m3u8+ts（`getHlsPlaylistPath()`），拉流 SRS 自动生成 |
-| FLV | ⚠️ | ✅ | Flash 视频；推流经 FFmpeg 走 RTMP 等，拉流 SRS 自动生成 |
-| WebRTC | ⚠️ | ✅ | Web 实时通信；推流建议用客户端推流器（浏览器 MediaStream），拉流可用客户端拉流器 |
-| DASH | ⚠️ | ✅ | 动态自适应流；主要用于拉流/播放，推流由源站或转码提供 |
+| 协议   | 推流 | 拉流 | 说明                                                                                     |
+| ------ | ---- | ---- | ---------------------------------------------------------------------------------------- |
+| RTMP   | ✅   | ✅   | 实时消息传输协议；服务端可直接推 RTMP，最常用                                            |
+| HLS    | ⚠️   | ✅   | HTTP 直播流；推流通过 FFmpeg 转码为 m3u8+ts（`getHlsPlaylistPath()`），拉流 SRS 自动生成 |
+| FLV    | ⚠️   | ✅   | Flash 视频；推流经 FFmpeg 走 RTMP 等，拉流 SRS 自动生成                                  |
+| WebRTC | ⚠️   | ✅   | Web 实时通信；推流建议用客户端推流器（浏览器 MediaStream），拉流可用客户端拉流器         |
+| DASH   | ⚠️   | ✅   | 动态自适应流；主要用于拉流/播放，推流由源站或转码提供                                    |
 
-**推流说明**：除 RTMP 可服务端直推外，HLS/FLV 可通过 FFmpeg 转码或经 RTMP 后由服务器生成；WebRTC 推流请用 `@dreamer/stream/client` 客户端。
+**推流说明**：除 RTMP 可服务端直推外，HLS/FLV 可通过 FFmpeg 转码或经 RTMP
+后由服务器生成；WebRTC 推流请用 `@dreamer/stream/client` 客户端。
 
 ---
 
@@ -531,12 +550,12 @@ docker run -d \
 本库共 **184 个测试**（21 个测试文件），全部通过；测试时间 2026-01-29。
 详细数据与场景见 [TEST_REPORT.md](./TEST_REPORT.md)。
 
-| 项目     | 说明           |
-|----------|----------------|
-| 测试总数 | 184 个         |
-| 通过数量 | 184 个 ✅      |
-| 测试文件 | 21 个          |
-| 测试时间 | 2026-01-29    |
+| 项目     | 说明       |
+| -------- | ---------- |
+| 测试总数 | 184 个     |
+| 通过数量 | 184 个 ✅  |
+| 测试文件 | 21 个      |
+| 测试时间 | 2026-01-29 |
 
 **运行测试**：
 
@@ -544,7 +563,8 @@ docker run -d \
 deno test -A tests/
 ```
 
-运行特定文件：`deno test -A tests/manager.test.ts`；集成测试（需 SRS）：`deno test -A tests/integration/`。
+运行特定文件：`deno test -A tests/manager.test.ts`；集成测试（需
+SRS）：`deno test -A tests/integration/`。
 
 ---
 
@@ -555,7 +575,8 @@ deno test -A tests/
 - **适配器模式**：支持多种流媒体服务器，易于扩展
 - **多协议支持**：支持 RTMP、HLS、FLV、WebRTC、DASH 等多种协议
 - **类型安全**：完整的 TypeScript 类型支持
-- **无外部依赖**：纯 TypeScript 实现（SRS 适配器需要 SRS 服务器，FFmpeg 适配器需要 FFmpeg，可选）
+- **无外部依赖**：纯 TypeScript 实现（SRS 适配器需要 SRS 服务器，FFmpeg
+  适配器需要 FFmpeg，可选）
 
 ---
 

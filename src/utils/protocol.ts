@@ -42,28 +42,23 @@ export function detectProtocol(url: string): StreamProtocol {
   // RTMP 协议
   if (lowerUrl.startsWith("rtmp://")) {
     protocol = "rtmp";
-  }
-  // HLS 协议
+  } // HLS 协议
   else if (lowerUrl.includes(".m3u8") || lowerUrl.includes("/hls/")) {
     protocol = "hls";
-  }
-  // FLV 协议
+  } // FLV 协议
   else if (lowerUrl.includes(".flv") || lowerUrl.includes("/flv/")) {
     protocol = "flv";
-  }
-  // WebRTC 协议
+  } // WebRTC 协议
   else if (
     lowerUrl.startsWith("ws://") ||
     lowerUrl.startsWith("wss://") ||
     lowerUrl.includes("/webrtc/")
   ) {
     protocol = "webrtc";
-  }
-  // DASH 协议
+  } // DASH 协议
   else if (lowerUrl.includes(".mpd") || lowerUrl.includes("/dash/")) {
     protocol = "dash";
-  }
-  // 默认返回 RTMP
+  } // 默认返回 RTMP
   else {
     protocol = "rtmp";
   }
@@ -184,6 +179,6 @@ export function supportsPublishing(protocol: StreamProtocol): boolean {
  * @param protocol 协议类型
  * @returns 是否支持拉流
  */
-export function supportsSubscribing(protocol: StreamProtocol): boolean {
+export function supportsSubscribing(_protocol: StreamProtocol): boolean {
   return true; // 所有协议都支持拉流
 }

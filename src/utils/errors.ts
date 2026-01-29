@@ -46,7 +46,7 @@ export class StreamAlreadyExistsError extends StreamError {
  */
 export class PublisherStateError extends StreamError {
   constructor(
-    streamId: string,
+    _streamId: string,
     currentStatus: string,
     expectedStatus: string,
   ) {
@@ -63,7 +63,7 @@ export class PublisherStateError extends StreamError {
  */
 export class SubscriberStateError extends StreamError {
   constructor(
-    streamId: string,
+    _streamId: string,
     currentStatus: string,
     expectedStatus: string,
   ) {
