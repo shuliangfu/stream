@@ -67,6 +67,7 @@ export type {
 
 // 导出管理器
 export {
+  createStreamManager,
   StreamManager,
   type StreamManagerOptions,
   type SupportedAdapterType,

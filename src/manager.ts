@@ -7,6 +7,7 @@
  * - 协调适配器和服务器
  */
 
+import type { ServiceContainer } from "@dreamer/service";
 import type { AdapterOptions, StreamAdapter } from "./adapters/base.ts";
 import { FFmpegAdapter, type FFmpegAdapterConfig } from "./adapters/ffmpeg.ts";
 import {
@@ -45,6 +46,8 @@ export type SupportedAdapterType =
  * 流管理器选项
  */
 export interface StreamManagerOptions {
+  /** 管理器名称（用于服务容器识别） */
+  name?: string;
   /** 适配器类型（srs、ffmpeg、nginx-rtmp、livekit、custom） */
   adapter: SupportedAdapterType;
   /** 适配器配置 */
@@ -65,10 +68,53 @@ export interface StreamManagerOptions {
 export class StreamManager {
   private adapter: StreamAdapter;
   private rooms: Map<string, Room> = new Map();
+  /** 服务容器实例 */
+  private container?: ServiceContainer;
+  /** 管理器名称 */
+  private readonly managerName: string;
 
   constructor(options: StreamManagerOptions) {
     // 创建适配器实例
     this.adapter = this.createAdapter(options);
+    this.managerName = options.name || "default";
+  }
+
+  /**
+   * 获取管理器名称
+   * @returns 管理器名称
+   */
+  getName(): string {
+    return this.managerName;
+  }
+
+  /**
+   * 设置服务容器
+   * @param container 服务容器实例
+   */
+  setContainer(container: ServiceContainer): void {
+    this.container = container;
+  }
+
+  /**
+   * 获取服务容器
+   * @returns 服务容器实例，如果未设置则返回 undefined
+   */
+  getContainer(): ServiceContainer | undefined {
+    return this.container;
+  }
+
+  /**
+   * 从服务容器创建 StreamManager 实例
+   * @param container 服务容器实例
+   * @param name 管理器名称（默认 "default"）
+   * @returns 关联了服务容器的 StreamManager 实例
+   */
+  static fromContainer(
+    container: ServiceContainer,
+    name = "default",
+  ): StreamManager | undefined {
+    const serviceName = `stream:${name}`;
+    return container.tryGet<StreamManager>(serviceName);
   }
 
   /**
@@ -335,4 +381,16 @@ export class StreamManager {
     }
     return await this.adapter.stopRecording(streamId);
   }
+}
+
+/**
+ * 创建 StreamManager 的工厂函数
+ * 用于服务容器注册
+ * @param options 流管理器配置选项
+ * @returns StreamManager 实例
+ */
+export function createStreamManager(
+  options: StreamManagerOptions,
+): StreamManager {
+  return new StreamManager(options);
 }

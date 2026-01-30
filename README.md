@@ -4,7 +4,7 @@
 
 [![JSR](https://jsr.io/badges/@dreamer/stream)](https://jsr.io/@dreamer/stream)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.md)
-[![Tests](https://img.shields.io/badge/tests-184%20passed-brightgreen)](./TEST_REPORT.md)
+[![Tests: 195 passed](https://img.shields.io/badge/Tests-195%20passed-brightgreen)](./TEST_REPORT.md)
 
 ---
 
@@ -92,6 +92,10 @@ bunx jsr add @dreamer/stream
   - 连接池（连接复用）
   - 重连管理（指数退避）
   - 批量操作（批量创建、删除、获取）
+- **服务容器集成**：
+  - 支持 `@dreamer/service` 依赖注入
+  - 管理多个 StreamManager 实例
+  - 提供 `createStreamManager` 工厂函数
 
 ---
 
@@ -553,9 +557,9 @@ docker run -d \
 | 项目     | 说明       |
 | -------- | ---------- |
 | 测试总数 | 184 个     |
-| 通过数量 | 184 个 ✅  |
+| 通过数量 | 195 个 ✅  |
 | 测试文件 | 21 个      |
-| 测试时间 | 2026-01-29 |
+| 测试时间 | 2026-01-30 |
 
 **运行测试**：
 
@@ -565,6 +569,45 @@ deno test -A tests/
 
 运行特定文件：`deno test -A tests/manager.test.ts`；集成测试（需
 SRS）：`deno test -A tests/integration/`。
+
+---
+
+## 🔗 ServiceContainer 集成
+
+StreamManager 支持与 `@dreamer/service` 服务容器集成：
+
+```typescript
+import { createStreamManager, StreamManager } from "jsr:@dreamer/stream";
+import { ServiceContainer } from "jsr:@dreamer/service";
+
+const container = new ServiceContainer();
+
+// 注册 StreamManager
+container.registerSingleton(
+  "stream:rtmp",
+  () => createStreamManager({ adapter: "ffmpeg", name: "rtmp" }),
+);
+
+container.registerSingleton(
+  "stream:srs",
+  () => createStreamManager({ adapter: "srs", name: "srs" }),
+);
+
+// 获取实例
+const rtmpManager = container.get<StreamManager>("stream:rtmp");
+
+// 或者使用静态方法
+const srsManager = StreamManager.fromContainer(container, "srs");
+```
+
+### StreamManager ServiceContainer 方法
+
+| 方法                                     | 描述               |
+| ---------------------------------------- | ------------------ |
+| `getName()`                              | 获取管理器名称     |
+| `setContainer(container)`                | 设置服务容器       |
+| `getContainer()`                         | 获取服务容器       |
+| `static fromContainer(container, name?)` | 从服务容器获取实例 |
 
 ---
 

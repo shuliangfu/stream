@@ -2,8 +2,9 @@
  * @fileoverview 流管理器测试
  */
 
+import { ServiceContainer } from "@dreamer/service";
 import { assertRejects, describe, expect, it } from "@dreamer/test";
-import { StreamManager } from "../src/manager.ts";
+import { createStreamManager, StreamManager } from "../src/manager.ts";
 
 describe("StreamManager", () => {
   it("应该创建管理器实例", () => {
@@ -270,5 +271,102 @@ describe("StreamManager", () => {
     const byPrivate = await manager.listRooms({ filter: { isPrivate: true } });
     expect(byPrivate.length).toBe(1);
     expect(byPrivate[0].name).toBe("私密房");
+  });
+});
+
+describe("StreamManager ServiceContainer 集成", () => {
+  it("应该获取默认管理器名称", () => {
+    const manager = new StreamManager({ adapter: "ffmpeg" });
+    expect(manager.getName()).toBe("default");
+  });
+
+  it("应该获取自定义管理器名称", () => {
+    const manager = new StreamManager({ adapter: "ffmpeg", name: "custom" });
+    expect(manager.getName()).toBe("custom");
+  });
+
+  it("应该设置和获取服务容器", () => {
+    const manager = new StreamManager({ adapter: "ffmpeg" });
+    const container = new ServiceContainer();
+
+    expect(manager.getContainer()).toBeUndefined();
+
+    manager.setContainer(container);
+    expect(manager.getContainer()).toBe(container);
+  });
+
+  it("应该从服务容器获取 StreamManager", () => {
+    const container = new ServiceContainer();
+    const manager = new StreamManager({ adapter: "ffmpeg", name: "test" });
+    manager.setContainer(container);
+
+    container.registerSingleton("stream:test", () => manager);
+
+    const retrieved = StreamManager.fromContainer(container, "test");
+    expect(retrieved).toBe(manager);
+  });
+
+  it("应该在服务不存在时返回 undefined", () => {
+    const container = new ServiceContainer();
+    const retrieved = StreamManager.fromContainer(container, "non-existent");
+    expect(retrieved).toBeUndefined();
+  });
+
+  it("应该支持多个 StreamManager 实例", () => {
+    const container = new ServiceContainer();
+
+    const rtmpManager = new StreamManager({ adapter: "ffmpeg", name: "rtmp" });
+    rtmpManager.setContainer(container);
+
+    const srsManager = new StreamManager({ adapter: "srs", name: "srs" });
+    srsManager.setContainer(container);
+
+    container.registerSingleton("stream:rtmp", () => rtmpManager);
+    container.registerSingleton("stream:srs", () => srsManager);
+
+    expect(StreamManager.fromContainer(container, "rtmp")).toBe(rtmpManager);
+    expect(StreamManager.fromContainer(container, "srs")).toBe(srsManager);
+  });
+});
+
+describe("createStreamManager 工厂函数", () => {
+  it("应该创建 StreamManager 实例", () => {
+    const manager = createStreamManager({ adapter: "ffmpeg" });
+    expect(manager).toBeInstanceOf(StreamManager);
+  });
+
+  it("应该使用默认名称", () => {
+    const manager = createStreamManager({ adapter: "ffmpeg" });
+    expect(manager.getName()).toBe("default");
+  });
+
+  it("应该使用自定义名称", () => {
+    const manager = createStreamManager({ adapter: "ffmpeg", name: "custom" });
+    expect(manager.getName()).toBe("custom");
+  });
+
+  it("应该能够在服务容器中注册", () => {
+    const container = new ServiceContainer();
+
+    container.registerSingleton(
+      "stream:main",
+      () => createStreamManager({ adapter: "ffmpeg", name: "main" }),
+    );
+
+    const manager = container.get<StreamManager>("stream:main");
+    expect(manager).toBeInstanceOf(StreamManager);
+    expect(manager.getName()).toBe("main");
+  });
+
+  it("应该支持流操作", async () => {
+    const manager = createStreamManager({ adapter: "ffmpeg" });
+
+    const stream = await manager.createStream({
+      name: "测试流",
+      protocol: "rtmp",
+    });
+
+    expect(stream.name).toBe("测试流");
+    expect(stream.protocol).toBe("rtmp");
   });
 });
