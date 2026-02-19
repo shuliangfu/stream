@@ -4,6 +4,8 @@
  * 提供有界队列、背压机制和批量处理功能
  */
 
+import { $tr } from "../i18n.ts";
+
 /**
  * 队列选项
  */
@@ -152,7 +154,8 @@ export class DataQueue<T> {
       try {
         await processor(batch);
       } catch (error) {
-        console.error("队列处理错误:", error);
+        const message = error instanceof Error ? error.message : String(error);
+        console.error($tr("stream.queue.processError", { message }));
       }
     }
 

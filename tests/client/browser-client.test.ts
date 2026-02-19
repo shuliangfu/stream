@@ -9,7 +9,13 @@
  */
 
 import { RUNTIME } from "@dreamer/runtime-adapter";
-import { describe, expect, it } from "@dreamer/test";
+import {
+  afterAll,
+  cleanupAllBrowsers,
+  describe,
+  expect,
+  it,
+} from "@dreamer/test";
 
 // 浏览器测试配置：与 webrtc 一致，browserMode: false 将 JSR 打进去
 const browserConfig = {
@@ -18,19 +24,12 @@ const browserConfig = {
   timeout: 120_000,
   browser: {
     enabled: true,
+    browserSource: "test" as const,
     entryPoint: "./src/client/mod.ts",
     globalName: "StreamClient",
     browserMode: false,
     moduleLoadTimeout: 90_000,
     headless: true,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-gpu",
-      "--use-fake-ui-for-media-stream",
-      "--use-fake-device-for-media-stream",
-    ],
     reuseBrowser: true,
     bodyContent: `
       <div id="test-container">
@@ -42,6 +41,10 @@ const browserConfig = {
 };
 
 describe(`Stream 客户端 - 浏览器测试 (${RUNTIME})`, () => {
+  afterAll(async () => {
+    await cleanupAllBrowsers();
+  });
+
   describe("StreamClient 浏览器环境", () => {
     it(
       "应该在浏览器中挂载 StreamClient 并导出 ClientPublisher、ClientSubscriber",

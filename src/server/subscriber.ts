@@ -12,6 +12,7 @@ import type {
   SubscriberStatistics,
   SubscriberStatus,
 } from "../types.ts";
+import { $tr } from "../i18n.ts";
 import { SubscriberStateError } from "../utils/errors.ts";
 import { subscribeWithFFmpeg } from "../utils/ffmpeg.ts";
 import { detectProtocol } from "../utils/protocol.ts";
@@ -60,7 +61,9 @@ export class ServerSubscriber implements Subscriber {
    */
   async connect(url: string, options?: SubscriberOptions): Promise<void> {
     if (this.status !== "idle") {
-      throw new Error(`拉流器状态错误，当前状态: ${this.status}`);
+      throw new Error(
+        $tr("stream.subscriber.statusError", { status: this.status }),
+      );
     }
 
     this.url = url;
@@ -109,7 +112,7 @@ export class ServerSubscriber implements Subscriber {
     }
 
     if (!this.url) {
-      throw new Error("拉流 URL 未设置");
+      throw new Error($tr("stream.subscriber.urlNotSet"));
     }
 
     this.status = "playing";
@@ -148,9 +151,11 @@ export class ServerSubscriber implements Subscriber {
         outputPath = this.url;
       } else if (protocol === "webrtc") {
         // WebRTC 需要信令服务器
-        throw new Error("WebRTC 拉流需要信令服务器支持，请使用客户端拉流器");
+        throw new Error($tr("stream.subscriber.webrtcRequiresSignaling"));
       } else {
-        throw new Error(`协议 ${protocol} 的拉流尚未实现`);
+        throw new Error(
+          $tr("stream.subscriber.protocolNotImplemented", { protocol }),
+        );
       }
 
       this.emitEvent("playing", { streamId: this.streamId, url: this.url });
@@ -216,7 +221,9 @@ export class ServerSubscriber implements Subscriber {
     }
 
     if (this.status !== "connected") {
-      throw new Error(`拉流器未连接，当前状态: ${this.status}`);
+      throw new Error(
+        $tr("stream.subscriber.notConnected", { status: this.status }),
+      );
     }
 
     this.status = "playing";
@@ -411,7 +418,12 @@ export class ServerSubscriber implements Subscriber {
         try {
           listener(data);
         } catch (error) {
-          console.error(`事件监听器错误 (${event}):`, error);
+          console.error(
+            $tr("stream.subscriber.listenerError", {
+              event,
+              message: error instanceof Error ? error.message : String(error),
+            }),
+          );
         }
       }
     }

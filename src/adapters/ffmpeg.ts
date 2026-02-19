@@ -15,6 +15,7 @@ import type {
   Subscriber,
   SubscriberOptions,
 } from "../types.ts";
+import { $tr } from "../i18n.ts";
 import { StreamNotFoundError } from "../utils/errors.ts";
 import { generateId } from "../utils/id.ts";
 import { generatePublisherUrl, generateSubscriberUrl } from "../utils/url.ts";
@@ -232,7 +233,7 @@ export class FFmpegAdapter implements StreamAdapter {
       stream.subscriberUrls.hls;
 
     if (!subscriberUrl) {
-      throw new Error(`流 ${streamId} 没有可用的拉流 URL`);
+      throw new Error($tr("stream.ffmpeg.noPullUrl", { streamId }));
     }
 
     const result = await recordStreamRealtime(subscriberUrl, {
@@ -255,7 +256,7 @@ export class FFmpegAdapter implements StreamAdapter {
   async stopRecording(streamId: string): Promise<string> {
     const recordingProcess = this.streamProcesses.get(`recording-${streamId}`);
     if (!recordingProcess) {
-      throw new Error(`流 ${streamId} 没有正在进行的录制`);
+      throw new Error($tr("stream.ffmpeg.noRecording", { streamId }));
     }
 
     // 停止录制进程

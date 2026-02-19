@@ -4,6 +4,8 @@
  * 提供连接复用、保活和智能管理功能
  */
 
+import { $tr } from "../i18n.ts";
+
 /**
  * 连接池选项
  */
@@ -87,7 +89,9 @@ export class ConnectionPool {
       // 如果仍然超过限制，等待或抛出错误
       if (this.connections.size >= this.maxConnections) {
         throw new Error(
-          `连接池已满（最大 ${this.maxConnections} 个连接）`,
+          $tr("stream.connectionPool.poolFull", {
+            max: String(this.maxConnections),
+          }),
         );
       }
     }
@@ -99,7 +103,8 @@ export class ConnectionPool {
         factory(),
         new Promise<never>((_, reject) => {
           timeoutId = setTimeout(
-            () => reject(new Error("连接超时")),
+            () =>
+              reject(new Error($tr("stream.connectionPool.connectionTimeout"))),
             this.timeout,
           ) as unknown as number;
         }),
@@ -126,11 +131,8 @@ export class ConnectionPool {
       if (timeoutId !== undefined) {
         clearTimeout(timeoutId);
       }
-      throw new Error(
-        `创建连接失败: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error($tr("stream.connectionPool.createFailed", { message }));
     }
   }
 
@@ -172,7 +174,8 @@ export class ConnectionPool {
         conn.destroy();
       }
     } catch (error) {
-      console.warn("关闭连接时出错:", error);
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn($tr("stream.connectionPool.closeError", { message }));
     }
   }
 

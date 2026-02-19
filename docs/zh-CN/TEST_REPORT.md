@@ -4,15 +4,15 @@
 
 | 项目             | 值                              |
 | ---------------- | ------------------------------- |
-| **测试库版本**   | `@dreamer/stream@1.0.0-beta.4`  |
+| **测试包版本**   | `@dreamer/stream@1.0.0-beta.4`  |
 | **服务容器版本** | `@dreamer/service@1.0.0-beta.4` |
-| **测试框架**     | `@dreamer/test@^1.0.0-beta.39`  |
-| **测试时间**     | `2026-01-30`                    |
+| **测试框架**     | `@dreamer/test@^1.0.11`         |
+| **测试时间**     | `2026-02-19`                    |
 | **测试环境**     | Deno 2.5+, Bun 1.0+             |
 | **测试文件数**   | 21                              |
-| **测试用例总数** | 195                             |
+| **测试用例总数** | 217                             |
 | **测试通过率**   | 100% ✅                         |
-| **测试执行时间** | ~7-19s                          |
+| **测试执行时间** | ~17s                            |
 
 ---
 
@@ -20,7 +20,7 @@
 
 ### 核心功能测试
 
-#### 1. 流管理器 (`manager.test.ts`) - 26 个测试
+#### 1. 流管理器 (`manager.test.ts`) - 27 个测试
 
 - ✅ **流管理**
   - `createStream` - 创建流
@@ -54,9 +54,9 @@
   - 在服务容器中注册
   - 支持流操作
 
-**测试结果**: 26 个测试全部通过
+**测试结果**: 27 个测试全部通过
 
-#### 2. 适配器测试 (`adapters/ffmpeg.test.ts`) - 10 个测试
+#### 2. 适配器测试 (`adapters/ffmpeg.test.ts`) - 11 个测试
 
 - ✅ **FFmpeg 适配器**
   - 创建适配器实例
@@ -69,9 +69,9 @@
   - 获取统计信息
   - 支持清理操作
 
-**测试结果**: 10 个测试全部通过
+**测试结果**: 11 个测试全部通过
 
-#### 3. SRS 适配器测试 (`adapters/srs.test.ts`) - 12 个测试
+#### 3. SRS 适配器测试 (`adapters/srs.test.ts`) - 13 个测试
 
 - ✅ **SRS 适配器**（mock fetch，无需真实 SRS 服务器）
   - 创建适配器实例、默认配置
@@ -81,9 +81,9 @@
   - getStatistics 对不存在的流抛出 StreamNotFoundError
   - connect 成功/失败
 
-**测试结果**: 12 个测试全部通过
+**测试结果**: 13 个测试全部通过
 
-#### 4. nginx-rtmp 适配器测试 (`adapters/nginx-rtmp.test.ts`) - 13 个测试
+#### 4. nginx-rtmp 适配器测试 (`adapters/nginx-rtmp.test.ts`) - 14 个测试
 
 - ✅ **NginxRtmpAdapter**（mock fetch /stat）
   - 创建适配器实例、默认配置
@@ -92,9 +92,9 @@
   - listStreams 合并 stat 与本地流
   - deleteStream、getStatistics、connect 失败、createPublisher/createSubscriber
 
-**测试结果**: 13 个测试全部通过
+**测试结果**: 14 个测试全部通过
 
-#### 5. LiveKit 适配器测试 (`adapters/livekit.test.ts`) - 11 个测试
+#### 5. LiveKit 适配器测试 (`adapters/livekit.test.ts`) - 12 个测试
 
 - ✅ **LiveKitAdapter**（mock fetch RoomService API）
   - 创建适配器实例、默认 host
@@ -102,9 +102,9 @@
   - getStream/listStreams/deleteStream/getStatistics
   - createPublisher/createSubscriber、StreamNotFoundError
 
-**测试结果**: 11 个测试全部通过
+**测试结果**: 12 个测试全部通过
 
-#### 6. 客户端浏览器测试 (`client/browser-client.test.ts`) - 9 个测试
+#### 6. 客户端浏览器测试 (`client/browser-client.test.ts`) - 11 个测试
 
 - ✅ **Stream 客户端 - 浏览器测试**（@dreamer/test 浏览器集成，Puppeteer +
   esbuild）
@@ -115,9 +115,9 @@
   - 事件 on/off、getStatistics 返回对象
   - MediaStream / HTMLVideoElement 环境检测
 
-**测试结果**: 9 个测试全部通过
+**测试结果**: 11 个测试全部通过
 
-#### 7. 服务端推拉流测试 (`server/publisher.test.ts`, `server/subscriber.test.ts`) - 16 个测试
+#### 7. 服务端推拉流测试 (`server/publisher.test.ts`, `server/subscriber.test.ts`) - 18 个测试
 
 - ✅ **ServerPublisher**
   - 创建实例、getStatistics（idle）、connect 后状态为 connected
@@ -128,7 +128,7 @@
   - 创建实例、getStatistics（idle）、connect 后状态为 connected
   - 未连接时 subscribe 抛出、重复 connect 抛出、on/off 事件
 
-**测试结果**: 16 个测试全部通过
+**测试结果**: 18 个测试全部通过
 
 #### 集成测试 (`integration/`)
 
@@ -138,7 +138,7 @@
 - ✅ 支持房间和流关联
 - ✅ 支持批量操作流
 
-**测试结果**: 3 个测试全部通过
+**测试结果**: 4 个测试全部通过
 
 **视频文件推流测试** (`video-file-publish.test.ts`)
 
@@ -147,7 +147,7 @@
 - ✅ 能够设置视频质量
 - ✅ 在不存在的视频文件时抛出错误
 
-**测试结果**: 4 个测试全部通过
+**测试结果**: 5 个测试全部通过
 
 ---
 
@@ -166,7 +166,7 @@
   - `AdapterError` - 适配器错误
   - `ConfigurationError` - 配置错误
 
-**测试结果**: 11 个测试全部通过
+**测试结果**: 12 个测试全部通过
 
 ### 协议处理 (`utils/protocol.test.ts`)
 
@@ -184,7 +184,7 @@
   - `supportsPublishing` - 判断协议是否支持推流
   - `supportsSubscribing` - 判断协议是否支持拉流
 
-**测试结果**: 17 个测试全部通过
+**测试结果**: 18 个测试全部通过
 
 ### URL 生成 (`utils/url.test.ts`)
 
@@ -196,7 +196,7 @@
   - `generatePublisherUrl` - 生成推流 URL（RTMP、WebRTC）
   - `generateSubscriberUrl` - 生成拉流 URL（HLS、FLV）
 
-**测试结果**: 8 个测试全部通过
+**测试结果**: 9 个测试全部通过
 
 ### 状态管理 (`utils/state.test.ts`)
 
@@ -212,7 +212,7 @@
   - `isActiveStatus` - 判断流状态是否为活动状态
   - `isErrorStatus` - 判断状态是否为错误状态
 
-**测试结果**: 11 个测试全部通过
+**测试结果**: 12 个测试全部通过
 
 ### ID 生成 (`utils/id.test.ts`)
 
@@ -223,7 +223,7 @@
   - `generateRoomId` - 生成房间 ID
   - 生成不同前缀的 ID
 
-**测试结果**: 5 个测试全部通过
+**测试结果**: 6 个测试全部通过
 
 ### 缓存 (`utils/cache.test.ts`)
 
@@ -238,7 +238,7 @@
   - 支持 has 方法
   - 支持清理过期项
 
-**测试结果**: 9 个测试全部通过
+**测试结果**: 10 个测试全部通过
 
 ### 流缓存 (`utils/stream-cache.test.ts`)
 
@@ -250,7 +250,7 @@
   - 支持清空操作
   - 提供统计信息
 
-**测试结果**: 6 个测试全部通过
+**测试结果**: 7 个测试全部通过
 
 ### 数据队列 (`utils/queue.test.ts`)
 
@@ -262,7 +262,7 @@
   - 支持清空操作
   - 支持自动处理
 
-**测试结果**: 6 个测试全部通过
+**测试结果**: 7 个测试全部通过
 
 ### 连接池 (`utils/connection-pool.test.ts`)
 
@@ -274,7 +274,7 @@
   - 提供统计信息
   - 在 stop 时清理所有连接
 
-**测试结果**: 6 个测试全部通过
+**测试结果**: 7 个测试全部通过
 
 ### 重连管理 (`utils/reconnect.test.ts`)
 
@@ -285,7 +285,7 @@
   - 支持重置操作
   - 支持停止操作
 
-**测试结果**: 5 个测试全部通过
+**测试结果**: 6 个测试全部通过
 
 ### 批量操作 (`utils/batch-operations.test.ts`)
 
@@ -298,7 +298,7 @@
   - `batchDeleteStreams` - 批量删除流
   - `batchGetStreams` - 批量获取流
 
-**测试结果**: 7 个测试全部通过
+**测试结果**: 8 个测试全部通过
 
 ---
 
@@ -306,33 +306,33 @@
 
 | 测试文件                                 | 测试数 | 状态        | 说明                                 |
 | ---------------------------------------- | ------ | ----------- | ------------------------------------ |
-| `manager.test.ts`                        | 26     | ✅ 全部通过 | 流管理器测试 + ServiceContainer 集成 |
-| `adapters/ffmpeg.test.ts`                | 10     | ✅ 全部通过 | FFmpeg 适配器测试                    |
-| `adapters/srs.test.ts`                   | 12     | ✅ 全部通过 | SRS 适配器测试                       |
-| `adapters/nginx-rtmp.test.ts`            | 13     | ✅ 全部通过 | nginx-rtmp 适配器测试                |
-| `adapters/livekit.test.ts`               | 11     | ✅ 全部通过 | LiveKit 适配器测试                   |
-| `client/browser-client.test.ts`          | 9      | ✅ 全部通过 | 浏览器客户端测试                     |
-| `server/publisher.test.ts`               | 10     | ✅ 全部通过 | 服务端推流器测试                     |
-| `server/subscriber.test.ts`              | 6      | ✅ 全部通过 | 服务端拉流器测试                     |
-| `integration/stream-lifecycle.test.ts`   | 3      | ✅ 全部通过 | 流生命周期集成测试                   |
-| `integration/video-file-publish.test.ts` | 4      | ✅ 全部通过 | 视频文件推流集成测试                 |
-| `utils/errors.test.ts`                   | 11     | ✅ 全部通过 | 错误类测试                           |
-| `utils/protocol.test.ts`                 | 17     | ✅ 全部通过 | 协议处理测试                         |
-| `utils/url.test.ts`                      | 8      | ✅ 全部通过 | URL 生成测试                         |
-| `utils/state.test.ts`                    | 11     | ✅ 全部通过 | 状态管理测试                         |
-| `utils/id.test.ts`                       | 5      | ✅ 全部通过 | ID 生成器测试                        |
-| `utils/cache.test.ts`                    | 9      | ✅ 全部通过 | LRU 缓存测试                         |
-| `utils/stream-cache.test.ts`             | 6      | ✅ 全部通过 | 流缓存测试                           |
-| `utils/queue.test.ts`                    | 6      | ✅ 全部通过 | 数据队列测试                         |
-| `utils/connection-pool.test.ts`          | 6      | ✅ 全部通过 | 连接池测试                           |
-| `utils/reconnect.test.ts`                | 5      | ✅ 全部通过 | 重连管理器测试                       |
-| `utils/batch-operations.test.ts`         | 7      | ✅ 全部通过 | 批量操作工具测试                     |
+| `manager.test.ts`                        | 27     | ✅ 全部通过 | 流管理器测试 + ServiceContainer 集成 |
+| `adapters/ffmpeg.test.ts`                | 11     | ✅ 全部通过 | FFmpeg 适配器测试                    |
+| `adapters/srs.test.ts`                   | 13     | ✅ 全部通过 | SRS 适配器测试                       |
+| `adapters/nginx-rtmp.test.ts`            | 14     | ✅ 全部通过 | nginx-rtmp 适配器测试                |
+| `adapters/livekit.test.ts`               | 12     | ✅ 全部通过 | LiveKit 适配器测试                   |
+| `client/browser-client.test.ts`          | 11     | ✅ 全部通过 | 浏览器客户端测试                     |
+| `server/publisher.test.ts`               | 11     | ✅ 全部通过 | 服务端推流器测试                     |
+| `server/subscriber.test.ts`              | 7      | ✅ 全部通过 | 服务端拉流器测试                     |
+| `integration/stream-lifecycle.test.ts`   | 4      | ✅ 全部通过 | 流生命周期集成测试                   |
+| `integration/video-file-publish.test.ts` | 5      | ✅ 全部通过 | 视频文件推流集成测试                 |
+| `utils/errors.test.ts`                   | 12     | ✅ 全部通过 | 错误类测试                           |
+| `utils/protocol.test.ts`                 | 18     | ✅ 全部通过 | 协议处理测试                         |
+| `utils/url.test.ts`                      | 9      | ✅ 全部通过 | URL 生成测试                         |
+| `utils/state.test.ts`                    | 12     | ✅ 全部通过 | 状态管理测试                         |
+| `utils/id.test.ts`                       | 6      | ✅ 全部通过 | ID 生成器测试                        |
+| `utils/cache.test.ts`                    | 10     | ✅ 全部通过 | LRU 缓存测试                         |
+| `utils/stream-cache.test.ts`             | 7      | ✅ 全部通过 | 流缓存测试                           |
+| `utils/queue.test.ts`                    | 7      | ✅ 全部通过 | 数据队列测试                         |
+| `utils/connection-pool.test.ts`          | 7      | ✅ 全部通过 | 连接池测试                           |
+| `utils/reconnect.test.ts`                | 6      | ✅ 全部通过 | 重连管理器测试                       |
+| `utils/batch-operations.test.ts`         | 8      | ✅ 全部通过 | 批量操作工具测试                     |
 
 ---
 
 ## 🔍 功能测试详情
 
-### 1. 流管理器 (`manager.test.ts`) - 26 个测试
+### 1. 流管理器 (`manager.test.ts`) - 27 个测试
 
 **测试场景**:
 
@@ -352,9 +352,9 @@
 - ✅ ServiceContainer 集成（6 个测试）
 - ✅ createStreamManager 工厂函数（5 个测试）
 
-**测试结果**: 26 个测试全部通过
+**测试结果**: 27 个测试全部通过
 
-### 2. FFmpeg 适配器 (`adapters/ffmpeg.test.ts`) - 10 个测试
+### 2. FFmpeg 适配器 (`adapters/ffmpeg.test.ts`) - 11 个测试
 
 **测试场景**:
 
@@ -369,9 +369,9 @@
 - ✅ 获取统计信息
 - ✅ 支持清理操作
 
-**测试结果**: 10 个测试全部通过
+**测试结果**: 11 个测试全部通过
 
-### 3. 流生命周期集成测试 (`integration/stream-lifecycle.test.ts`) - 3 个测试
+### 3. 流生命周期集成测试 (`integration/stream-lifecycle.test.ts`) - 4 个测试
 
 **测试场景**:
 
@@ -379,9 +379,9 @@
 - ✅ 支持房间和流关联
 - ✅ 支持批量操作流
 
-**测试结果**: 3 个测试全部通过
+**测试结果**: 4 个测试全部通过
 
-### 4. 视频文件推流集成测试 (`integration/video-file-publish.test.ts`) - 4 个测试
+### 4. 视频文件推流集成测试 (`integration/video-file-publish.test.ts`) - 5 个测试
 
 **测试场景**:
 
@@ -390,7 +390,7 @@
 - ✅ 能够设置视频质量（分辨率、码率、帧率）
 - ✅ 在不存在的视频文件时抛出错误
 
-**测试结果**: 4 个测试全部通过
+**测试结果**: 5 个测试全部通过
 
 **注意事项**:
 
@@ -398,7 +398,7 @@
 - 测试会自动处理端口冲突和资源清理
 - 包含超时保护机制，避免测试卡住
 
-### 5. 协议处理 (`utils/protocol.test.ts`) - 17 个测试
+### 5. 协议处理 (`utils/protocol.test.ts`) - 18 个测试
 
 **测试场景**:
 
@@ -408,9 +408,9 @@
 - ✅ 默认端口获取
 - ✅ 协议能力判断（推流、拉流）
 
-**测试结果**: 17 个测试全部通过
+**测试结果**: 18 个测试全部通过
 
-### 6. 连接池 (`utils/connection-pool.test.ts`) - 6 个测试
+### 6. 连接池 (`utils/connection-pool.test.ts`) - 7 个测试
 
 **测试场景**:
 
@@ -421,11 +421,11 @@
 - ✅ 提供统计信息（total、active、idle）
 - ✅ 在 stop 时清理所有连接
 
-**测试结果**: 6 个测试全部通过
+**测试结果**: 7 个测试全部通过
 
 **性能**: 每个测试约 150-160ms（包含定时器清理等待）
 
-### 7. 重连管理器 (`utils/reconnect.test.ts`) - 5 个测试
+### 7. 重连管理器 (`utils/reconnect.test.ts`) - 6 个测试
 
 **测试场景**:
 
@@ -435,11 +435,11 @@
 - ✅ 支持重置操作
 - ✅ 支持停止操作
 
-**测试结果**: 5 个测试全部通过
+**测试结果**: 6 个测试全部通过
 
-**性能**: 基本重连测试约 714ms（包含重试延迟）
+**性能**: 基本重连测试约 707ms（包含重试延迟）
 
-### 8. 批量操作 (`utils/batch-operations.test.ts`) - 7 个测试
+### 8. 批量操作 (`utils/batch-operations.test.ts`) - 8 个测试
 
 **测试场景**:
 
@@ -451,15 +451,15 @@
 - ✅ 批量删除流
 - ✅ 批量获取流
 
-**测试结果**: 7 个测试全部通过
+**测试结果**: 8 个测试全部通过
 
 ---
 
 ## ⚡ 性能指标
 
-- **总测试执行时间**: ~11 秒
-- **平均每个测试**: ~92ms
-- **最慢测试**: 重连管理器基本重连操作（714ms，包含重试延迟）
+- **总测试执行时间**: ~17 秒
+- **平均每个测试**: ~78ms
+- **最慢测试**: 重连管理器基本重连操作（约 707ms，包含重试延迟）
 - **最快测试**: 大部分工具函数测试（< 1ms）
 
 ---
@@ -486,7 +486,7 @@
 
 ## 🎯 测试环境
 
-- **测试框架**: @dreamer/test@^1.0.0-beta.13
+- **测试框架**: @dreamer/test@^1.0.11
 - **运行时**: Deno 2.6.4+ / Bun 1.3.5
 - **外部依赖**:
   - SRS Docker 服务器（用于视频文件推流测试）
@@ -552,7 +552,7 @@ deno test -A tests/integration/
 
 ## 📊 测试总结
 
-✅ **所有 195 个测试全部通过**
+✅ **所有 217 个测试全部通过**
 
 - 核心功能测试（流管理、适配器、客户端、服务端）
 - 工具函数测试
@@ -580,4 +580,4 @@ deno test -A tests/integration/
 
 ---
 
-_最后更新: 2026-01-30_
+_最后更新: 2026-02-19_

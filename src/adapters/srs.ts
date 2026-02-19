@@ -15,6 +15,7 @@ import type {
   Subscriber,
   SubscriberOptions,
 } from "../types.ts";
+import { $tr } from "../i18n.ts";
 import { ConnectionError, StreamNotFoundError } from "../utils/errors.ts";
 import { generateId } from "../utils/id.ts";
 import { generatePublisherUrl, generateSubscriberUrl } from "../utils/url.ts";
@@ -83,7 +84,9 @@ export class SRSAdapter implements StreamAdapter {
     try {
       const response = await fetch(`${this.apiUrl}/api/v1/summaries`);
       if (!response.ok) {
-        throw new Error(`SRS 服务器连接失败: ${response.statusText}`);
+        throw new Error(
+          $tr("stream.srs.connectFailed", { statusText: response.statusText }),
+        );
       }
     } catch (error) {
       throw new ConnectionError(
@@ -125,7 +128,9 @@ export class SRSAdapter implements StreamAdapter {
     });
 
     if (!response.ok) {
-      throw new Error(`SRS API 调用失败: ${response.statusText}`);
+      throw new Error(
+        $tr("stream.srs.apiFailed", { statusText: response.statusText }),
+      );
     }
 
     return await response.json();

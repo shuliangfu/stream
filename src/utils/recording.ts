@@ -6,6 +6,7 @@
 
 import { createCommand, makeTempFile } from "@dreamer/runtime-adapter";
 import type { VideoQuality } from "../types.ts";
+import { $tr } from "../i18n.ts";
 import { ConnectionError } from "./errors.ts";
 
 /**
@@ -219,7 +220,11 @@ export async function recordStreamRealtime(
         // 等待进程结束（status 是属性，不是方法）
         await child.status;
       } catch (error) {
-        console.warn("停止 FFmpeg 录制进程时出错:", error);
+        console.warn(
+          $tr("stream.recording.stopFfmpegError", {
+            message: error instanceof Error ? error.message : String(error),
+          }),
+        );
       }
     },
   };

@@ -5,6 +5,7 @@
  */
 
 import type { StreamProtocol } from "../types.ts";
+import { $tr } from "../i18n.ts";
 import { ProtocolNotSupportedError } from "./errors.ts";
 
 /**
@@ -107,7 +108,7 @@ export function parseRtmpUrl(url: string): {
 } {
   const match = url.match(/^rtmp:\/\/([^:]+):?(\d+)?\/(.+)\/(.+)$/);
   if (!match) {
-    throw new Error(`无效的 RTMP URL: ${url}`);
+    throw new Error($tr("stream.protocol.invalidRtmpUrl", { url }));
   }
 
   return {

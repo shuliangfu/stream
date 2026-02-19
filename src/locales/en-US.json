@@ -1,0 +1,47 @@
+{
+  "stream": {
+    "subscriber": {
+      "statusError": "Subscriber status error, current status: {status}",
+      "urlNotSet": "Subscriber URL not set",
+      "webrtcRequiresSignaling": "WebRTC subscribe requires signaling server, please use client subscriber",
+      "protocolNotImplemented": "Subscribe for protocol {protocol} not implemented",
+      "notConnected": "Subscriber not connected, current status: {status}",
+      "listenerError": "Listener error ({event}): {message}"
+    },
+    "publisher": {
+      "statusError": "Publisher status error, current status: {status}",
+      "urlNotSet": "Publisher URL not set",
+      "serverOnlyFileBlob": "Server publish only supports file path, Blob, File; for MediaStream use client publisher",
+      "webrtcRequiresSignaling": "WebRTC publish requires signaling server, please use WebRTC adapter",
+      "protocolNotImplemented": "Publish for protocol {protocol} not implemented",
+      "listenerError": "Listener error ({event}): {message}"
+    },
+    "srs": {
+      "connectFailed": "SRS server connection failed: {statusText}",
+      "apiFailed": "SRS API call failed: {statusText}"
+    },
+    "ffmpeg": {
+      "noPullUrl": "Stream {streamId} has no available pull URL",
+      "noRecording": "Stream {streamId} has no ongoing recording"
+    },
+    "protocol": {
+      "invalidRtmpUrl": "Invalid RTMP URL: {url}"
+    },
+    "url": {
+      "unsupportedPublishProtocol": "Unsupported publish protocol: {protocol}",
+      "unsupportedSubscribeProtocol": "Unsupported subscribe protocol: {protocol}"
+    },
+    "recording": {
+      "stopFfmpegError": "Error stopping FFmpeg recording process: {message}"
+    },
+    "connectionPool": {
+      "poolFull": "Connection pool full (max {max} connections)",
+      "connectionTimeout": "Connection timeout",
+      "createFailed": "Failed to create connection: {message}",
+      "closeError": "Error closing connection: {message}"
+    },
+    "queue": {
+      "processError": "Queue process error: {message}"
+    }
+  }
+}

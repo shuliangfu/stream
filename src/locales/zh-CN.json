@@ -1,0 +1,47 @@
+{
+  "stream": {
+    "subscriber": {
+      "statusError": "拉流器状态错误，当前状态: {status}",
+      "urlNotSet": "拉流 URL 未设置",
+      "webrtcRequiresSignaling": "WebRTC 拉流需要信令服务器支持，请使用客户端拉流器",
+      "protocolNotImplemented": "协议 {protocol} 的拉流尚未实现",
+      "notConnected": "拉流器未连接，当前状态: {status}",
+      "listenerError": "事件监听器错误 ({event}): {message}"
+    },
+    "publisher": {
+      "statusError": "推流器状态错误，当前状态: {status}",
+      "urlNotSet": "推流 URL 未设置",
+      "serverOnlyFileBlob": "服务端推流仅支持文件路径、Blob、File；MediaStream 请使用客户端推流器",
+      "webrtcRequiresSignaling": "WebRTC 推流需要信令服务器支持，请使用专门的 WebRTC 适配器",
+      "protocolNotImplemented": "协议 {protocol} 的推流尚未实现",
+      "listenerError": "事件监听器错误 ({event}): {message}"
+    },
+    "srs": {
+      "connectFailed": "SRS 服务器连接失败: {statusText}",
+      "apiFailed": "SRS API 调用失败: {statusText}"
+    },
+    "ffmpeg": {
+      "noPullUrl": "流 {streamId} 没有可用的拉流 URL",
+      "noRecording": "流 {streamId} 没有正在进行的录制"
+    },
+    "protocol": {
+      "invalidRtmpUrl": "无效的 RTMP URL: {url}"
+    },
+    "url": {
+      "unsupportedPublishProtocol": "不支持的推流协议: {protocol}",
+      "unsupportedSubscribeProtocol": "不支持的拉流协议: {protocol}"
+    },
+    "recording": {
+      "stopFfmpegError": "停止 FFmpeg 录制进程时出错: {message}"
+    },
+    "connectionPool": {
+      "poolFull": "连接池已满（最大 {max} 个连接）",
+      "connectionTimeout": "连接超时",
+      "createFailed": "创建连接失败: {message}",
+      "closeError": "关闭连接时出错: {message}"
+    },
+    "queue": {
+      "processError": "队列处理错误: {message}"
+    }
+  }
+}

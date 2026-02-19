@@ -5,6 +5,7 @@
  */
 
 import type { StreamProtocol } from "../types.ts";
+import { $tr } from "../i18n.ts";
 
 /**
  * 生成 RTMP 推流 URL
@@ -126,7 +127,9 @@ export function generatePublisherUrl(
     case "webrtc":
       return generateWebRtcUrl(host, port, app, streamKey);
     default:
-      throw new Error(`不支持的推流协议: ${protocol}`);
+      throw new Error(
+        $tr("stream.url.unsupportedPublishProtocol", { protocol }),
+      );
   }
 }
 
@@ -157,6 +160,8 @@ export function generateSubscriberUrl(
     case "webrtc":
       return generateWebRtcUrl(host, port, app, streamKey);
     default:
-      throw new Error(`不支持的拉流协议: ${protocol}`);
+      throw new Error(
+        $tr("stream.url.unsupportedSubscribeProtocol", { protocol }),
+      );
   }
 }

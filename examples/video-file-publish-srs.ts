@@ -108,7 +108,12 @@ export async function videoFilePublishWithSRSExample(videoPath: string) {
         // 忽略错误，继续等待
       }
       await new Promise((resolve) => setTimeout(resolve, checkInterval));
-      process.stdout.write(".");
+      if (typeof Deno !== "undefined") {
+        await Deno.stdout.write(new TextEncoder().encode("."));
+      } else {
+        (globalThis as { process?: { stdout?: { write: (s: string) => void } } })
+          .process?.stdout?.write(".");
+      }
     }
 
     if (!streamReady) {

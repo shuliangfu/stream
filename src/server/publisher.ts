@@ -21,6 +21,7 @@ import type {
   PublisherStatus,
   VideoQuality,
 } from "../types.ts";
+import { $tr } from "../i18n.ts";
 import { PublisherStateError } from "../utils/errors.ts";
 import { publishWithFFmpeg, transcodeToHLS } from "../utils/ffmpeg.ts";
 import { detectProtocol } from "../utils/protocol.ts";
@@ -81,7 +82,9 @@ export class ServerPublisher implements Publisher {
    */
   async connect(url: string, options?: PublisherOptions): Promise<void> {
     if (this.status !== "idle") {
-      throw new Error(`推流器状态错误，当前状态: ${this.status}`);
+      throw new Error(
+        $tr("stream.publisher.statusError", { status: this.status }),
+      );
     }
 
     this.url = url;
@@ -185,7 +188,7 @@ export class ServerPublisher implements Publisher {
     }
 
     if (!this.url) {
-      throw new Error("推流 URL 未设置");
+      throw new Error($tr("stream.publisher.urlNotSet"));
     }
 
     this.status = "publishing";
@@ -197,9 +200,7 @@ export class ServerPublisher implements Publisher {
         typeof source !== "string" &&
         !(source instanceof Blob)
       ) {
-        throw new Error(
-          "服务端推流仅支持文件路径、Blob、File；MediaStream 请使用客户端推流器",
-        );
+        throw new Error($tr("stream.publisher.serverOnlyFileBlob"));
       }
       // 将 Blob/File 转为临时文件路径（string 直接使用）
       const { path: filePath } = await this.resolveMediaSourceToFilePath(
@@ -254,11 +255,11 @@ export class ServerPublisher implements Publisher {
         this.hlsPlaylistPath = result.playlistPath;
         this.hlsProcess = result;
       } else if (protocol === "webrtc") {
-        throw new Error(
-          "WebRTC 推流需要信令服务器支持，请使用专门的 WebRTC 适配器",
-        );
+        throw new Error($tr("stream.publisher.webrtcRequiresSignaling"));
       } else {
-        throw new Error(`协议 ${protocol} 的推流尚未实现`);
+        throw new Error(
+          $tr("stream.publisher.protocolNotImplemented", { protocol }),
+        );
       }
 
       this.emitEvent("publishing", {
@@ -517,7 +518,12 @@ export class ServerPublisher implements Publisher {
         try {
           listener(data);
         } catch (error) {
-          console.error(`事件监听器错误 (${event}):`, error);
+          console.error(
+            $tr("stream.publisher.listenerError", {
+              event,
+              message: error instanceof Error ? error.message : String(error),
+            }),
+          );
         }
       }
     }
