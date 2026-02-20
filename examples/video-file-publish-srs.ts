@@ -111,7 +111,9 @@ export async function videoFilePublishWithSRSExample(videoPath: string) {
       if (typeof Deno !== "undefined") {
         await Deno.stdout.write(new TextEncoder().encode("."));
       } else {
-        (globalThis as { process?: { stdout?: { write: (s: string) => void } } })
+        (globalThis as {
+          process?: { stdout?: { write: (s: string) => void } };
+        })
           .process?.stdout?.write(".");
       }
     }
