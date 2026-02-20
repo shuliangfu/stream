@@ -3,7 +3,10 @@
  */
 
 import { describe, expect, it } from "@dreamer/test";
+import { setStreamLocale } from "../../src/i18n.ts";
 import { ConnectionPool } from "../../src/utils/connection-pool.ts";
+
+setStreamLocale("zh-CN");
 
 // 辅助函数：清理连接池并等待
 async function cleanupPool(pool: ConnectionPool) {

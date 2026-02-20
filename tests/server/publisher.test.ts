@@ -3,7 +3,10 @@
  */
 
 import { assertRejects, describe, expect, it } from "@dreamer/test";
+import { setStreamLocale } from "../../src/i18n.ts";
 import { ServerPublisher } from "../../src/server/publisher.ts";
+
+setStreamLocale("zh-CN");
 
 /** 用于测试的 mock Socket.io Server（避免真实启动端口；需具备 of、listen、on） */
 function createMockIo() {
