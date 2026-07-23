@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.1.0] - 2026-07-23
+
+### Added
+
+- **Node.js 22+ compatibility**: The server-side package (adapters,
+  StreamManager, ServerPublisher/ServerSubscriber, utilities) now runs on
+  Node.js 22+. Source uses no `Deno.*` APIs and no `IS_NODE` branches — all
+  runtime differences are abstracted via `@dreamer/runtime-adapter`. The client
+  subpath (`@dreamer/stream/client`) remains browser-only.
+
+### Changed
+
+- Bumped `@dreamer/runtime-adapter` to ^1.2.2 (IS_NODE support).
+- Bumped `@dreamer/socket-io` to ^1.2.0 — critical: socket-io 1.2.0 lazy-loads
+  mongodb in `connect()`, fixing Bun's `NotImplementedError: node:v8
+  isBuildingSnapshot` (bson CJS module) when `import { Server }` was used.
+- Bumped `@dreamer/service` to ^1.1.0, `@dreamer/i18n` to ^1.1.2,
+  `@dreamer/video` to ^1.1.0, `@dreamer/test` to ^1.2.3.
+- `deno.json` `compilerOptions.lib` now includes `deno.ns` + `esnext` (prevents
+  `nodeModulesDir: "auto"` loading `@types/node` and overriding `ImportMeta`).
+
+### Infrastructure
+
+- 9-job CI matrix: 3 Deno v2.9 + 3 Bun + 3 Node 22 (Linux/macOS/Windows), no
+  Chromium, no external streaming services. Adapter tests use mock `fetch`.
+- `tsconfig.json` (Bundler mode for tsx/Node).
+- `test-node.mjs` — Node test runner running in the main process (no `--test`
+  flag → no fork/IPC, avoiding stdout pollution from logger output).
+- `--minimum-dependency-age=0` for JSR dependency resolution.
+- Integration tests (`tests/integration/`, need real streaming servers +
+  `test.mp4`) and browser test (`tests/client/browser-client.test.ts`, need
+  Playwright) split to `test:integration`; CI runs 18 unit files only.
+- `package.json` `engines.node >= 22`, `test:node` script; `.npmrc` @jsr
+  registry.
+
+---
+
 ## [1.0.0] - 2026-02-19
 
 ### Added

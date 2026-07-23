@@ -1,14 +1,14 @@
 # @dreamer/stream
 
-> A live streaming library compatible with Deno and Bun, providing full push,
-> pull, stream management, and processing.
+> A live streaming library compatible with Deno, Bun, and Node.js 22+,
+> providing full push, pull, stream management, and processing.
 
 **中文**: [README (中文)](./docs/zh-CN/README.md) · **Test report (EN)**:
 [docs/en-US/TEST_REPORT.md](./docs/en-US/TEST_REPORT.md)
 
 [![JSR](https://jsr.io/badges/@dreamer/stream)](https://jsr.io/@dreamer/stream)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
-[![Tests: 217 passed](https://img.shields.io/badge/Tests-217%20passed-brightgreen)](./docs/en-US/TEST_REPORT.md)
+[![Tests: 197 passed](https://img.shields.io/badge/Tests-197%20passed-brightgreen)](./docs/en-US/TEST_REPORT.md)
 
 ---
 
@@ -33,6 +33,12 @@ deno add jsr:@dreamer/stream
 bunx jsr add @dreamer/stream
 ```
 
+### Node.js 22+
+
+```bash
+npx jsr add @dreamer/stream
+```
+
 ---
 
 ## 🌍 Environment compatibility
@@ -41,7 +47,8 @@ bunx jsr add @dreamer/stream
 | ------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Deno**     | 2.5+    | ✅ Fully supported                                                                                                                                                                                                                          |
 | **Bun**      | 1.0+    | ✅ Fully supported                                                                                                                                                                                                                          |
-| **Server**   | -       | ✅ Supported (Deno and Bun runtimes; SRS and FFmpeg adapters)                                                                                                                                                                               |
+| **Node.js**  | 22+     | ✅ Fully supported (server-side adapters; client subpath is browser-only)                                                                                                                                                                   |
+| **Server**   | -       | ✅ Supported (Deno, Bun, and Node.js runtimes; SRS and FFmpeg adapters)                                                                                                                                                                     |
 | **Client**   | -       | ✅ Supported (browser; use `jsr:@dreamer/stream/client` for client push/pull)                                                                                                                                                               |
 | **Optional** | -       | 📦 SRS adapter: SRS server (optional)<br>📦 FFmpeg adapter: FFmpeg + external RTMP server (optional)<br>📦 nginx-rtmp adapter: nginx-rtmp-module with /stat (optional)<br>📦 LiveKit adapter: LiveKit service + apiKey/apiSecret (optional) |
 
@@ -462,6 +469,22 @@ For client push/pull, see [client/README.md](./src/client/README.md).
 
 ## 📋 Changelog
 
+### [1.1.0] - 2026-07-23
+
+- **Added**: Node.js 22+ compatibility. The server-side package (adapters,
+  StreamManager, publisher/subscriber, utilities) now runs on Node.js 22+ via
+  `node:sqlite`-free pure-logic + cross-runtime Web APIs. Client subpath
+  remains browser-only.
+- **Changed**: Bumped `@dreamer/runtime-adapter` to ^1.2.2,
+  `@dreamer/socket-io` to ^1.2.0 (lazy-loads mongodb, fixing Bun
+  `node:v8.isBuildingSnapshot` error), `@dreamer/service` to ^1.1.0,
+  `@dreamer/i18n` to ^1.1.2, `@dreamer/video` to ^1.1.0, `@dreamer/test` to
+  ^1.2.3.
+- **Infrastructure**: 9-job CI (3 Deno v2.9 + 3 Bun + 3 Node 22, no Chromium,
+  no external services); `tsconfig.json` (Bundler mode); `test-node.mjs`
+  (Node test runner, main-process, no fork/IPC); `--minimum-dependency-age=0`
+  for JSR dep resolution; integration/browser tests split to `test:integration`.
+
 ### [1.0.0] - 2026-02-19
 
 - **Added**: Initial stable release. StreamManager, createStreamManager,
@@ -476,15 +499,16 @@ Full history: [docs/en-US/CHANGELOG.md](./docs/en-US/CHANGELOG.md)
 
 ## 📊 Test report
 
-**217 tests** (21 files), all passing; date 2026-02-19. Details:
+**197 tests** (18 unit files) passing on Deno 2.9, Bun, and Node.js 22
+across Linux, macOS, and Windows. Details:
 [docs/en-US/TEST_REPORT.md](./docs/en-US/TEST_REPORT.md).
 
 | Item        | Value      |
 | ----------- | ---------- |
-| Total tests | 217        |
-| Passed      | 217 ✅     |
-| Test files  | 21         |
-| Date        | 2026-02-19 |
+| Total tests | 197        |
+| Passed      | 197 ✅     |
+| Test files  | 18         |
+| Date        | 2026-07-23 |
 
 **Run tests**:
 

@@ -1,13 +1,13 @@
 # @dreamer/stream
 
-> 一个兼容 Deno 和 Bun 的直播流媒体库，提供完整的直播推流、拉流、管理和处理功能
+> 一个兼容 Deno、Bun 和 Node.js 22+ 的直播流媒体库，提供完整的直播推流、拉流、管理和处理功能
 
 **English**: [README](../../README.md) · **Test report (EN)**:
 [en-US/TEST_REPORT.md](../en-US/TEST_REPORT.md)
 
 [![JSR](https://jsr.io/badges/@dreamer/stream)](https://jsr.io/@dreamer/stream)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../../LICENSE)
-[![Tests: 217 passed](https://img.shields.io/badge/Tests-217%20passed-brightgreen)](./TEST_REPORT.md)
+[![Tests: 197 passed](https://img.shields.io/badge/Tests-197%20passed-brightgreen)](./TEST_REPORT.md)
 
 ---
 
@@ -31,6 +31,12 @@ deno add jsr:@dreamer/stream
 bunx jsr add @dreamer/stream
 ```
 
+### Node.js 22+
+
+```bash
+npx jsr add @dreamer/stream
+```
+
 ---
 
 ## 🌍 环境兼容性
@@ -39,7 +45,8 @@ bunx jsr add @dreamer/stream
 | ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Deno**   | 2.5+     | ✅ 完全支持                                                                                                                                                                                                                    |
 | **Bun**    | 1.0+     | ✅ 完全支持                                                                                                                                                                                                                    |
-| **服务端** | -        | ✅ 支持（兼容 Deno 和 Bun 运行时，支持 SRS 和 FFmpeg 适配器）                                                                                                                                                                  |
+| **Node.js** | 22+     | ✅ 完全支持（服务端适配器；client 子路径仅浏览器）                                                                                                                                                                              |
+| **服务端** | -        | ✅ 支持（兼容 Deno、Bun 和 Node.js 运行时，支持 SRS 和 FFmpeg 适配器）                                                                                                                                                          |
 | **客户端** | -        | ✅ 支持（浏览器环境，通过 `jsr:@dreamer/stream/client` 使用客户端推拉流）                                                                                                                                                      |
 | **依赖**   | -        | 📦 SRS 适配器需要 SRS 服务器（可选）<br>📦 FFmpeg 适配器需要 FFmpeg 和外部 RTMP 服务器（可选）<br>📦 nginx-rtmp 适配器需要 nginx-rtmp-module 与 /stat（可选）<br>📦 LiveKit 适配器需要 LiveKit 服务与 apiKey/apiSecret（可选） |
 
@@ -554,6 +561,20 @@ docker run -d \
 
 ## 📋 变更日志
 
+### [1.1.0] - 2026-07-23
+
+- **新增**：Node.js 22+ 兼容。服务端包（适配器、StreamManager、publisher/subscriber、
+  工具函数）现可在 Node.js 22+ 运行。源码无 `Deno.*` API、无 `IS_NODE` 分支——所有运行时
+  差异经 `@dreamer/runtime-adapter` 抽象。client 子路径仍仅限浏览器。
+- **变更**：升级 `@dreamer/runtime-adapter` 至 ^1.2.2；`@dreamer/socket-io` 至 ^1.2.0
+  （懒加载 mongodb，修复 Bun `node:v8 isBuildingSnapshot` 错误）；`@dreamer/service`
+  至 ^1.1.0、`@dreamer/i18n` 至 ^1.1.2、`@dreamer/video` 至 ^1.1.0、`@dreamer/test`
+  至 ^1.2.3。
+- **基础设施**：9-job CI（3 Deno v2.9 + 3 Bun + 3 Node 22，无 Chromium 无外部服务）；
+  `tsconfig.json`（Bundler 模式）；`test-node.mjs`（Node 测试运行器，主进程内执行，
+  无 fork/IPC）；`--minimum-dependency-age=0` 解析 JSR 依赖；集成/浏览器测试拆为
+  `test:integration`。
+
 ### [1.0.0] - 2026-02-19
 
 - **新增**：首个稳定版。StreamManager、createStreamManager、SRS/nginx-rtmp/LiveKit/FFmpeg
@@ -567,15 +588,15 @@ docker run -d \
 
 ## 📊 测试报告
 
-本库共 **217 个测试**（21 个测试文件），全部通过；测试时间 2026-02-19。
-详细数据与场景见 [TEST_REPORT.md](./TEST_REPORT.md)。
+**197 个测试**（18 个单元测试文件）在 Deno 2.9、Bun、Node.js 22 三端 × Linux/macOS/Windows
+全部通过。详细数据与场景见 [TEST_REPORT.md](./TEST_REPORT.md)。
 
 | 项目     | 说明       |
 | -------- | ---------- |
-| 测试总数 | 217 个     |
-| 通过数量 | 217 个 ✅  |
-| 测试文件 | 21 个      |
-| 测试时间 | 2026-02-19 |
+| 测试总数 | 197 个     |
+| 通过数量 | 197 个 ✅  |
+| 测试文件 | 18 个      |
+| 测试时间 | 2026-07-23 |
 
 **运行测试**：
 

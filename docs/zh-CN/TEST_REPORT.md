@@ -4,15 +4,29 @@
 
 | 项目             | 值                              |
 | ---------------- | ------------------------------- |
-| **测试包版本**   | `@dreamer/stream@1.0.0-beta.4`  |
-| **服务容器版本** | `@dreamer/service@1.0.0-beta.4` |
-| **测试框架**     | `@dreamer/test@^1.0.11`         |
-| **测试时间**     | `2026-02-19`                    |
-| **测试环境**     | Deno 2.5+, Bun 1.0+             |
-| **测试文件数**   | 21                              |
-| **测试用例总数** | 217                             |
+| **测试包版本**   | `@dreamer/stream@1.1.0`         |
+| **服务容器版本** | `@dreamer/service@1.1.0`        |
+| **测试框架**     | `@dreamer/test@^1.2.3`          |
+| **测试时间**     | `2026-07-23`                    |
+| **测试环境**     | Deno 2.9+、Bun 1.3+、Node.js 22+ |
+| **测试文件数**   | 18（单元测试；集成/浏览器测试排除） |
+| **测试用例总数** | 197（Deno）                     |
 | **测试通过率**   | 100% ✅                         |
-| **测试执行时间** | ~17s                            |
+| **测试执行时间** | ~4s（Deno）                     |
+
+### 跨运行时 CI 结果（Node.js 22+ 兼容）
+
+CI 在 3 运行时 × 3 操作系统（9 jobs）上运行 18 个单元测试文件（排除
+`tests/integration/` 和 `tests/client/browser-client.test.ts`）：
+
+| 运行时 | 操作系统 | 结果 | 说明 |
+| ------ | -------- | ---- | ---- |
+| **Deno 2.9** | Linux / macOS / Windows | ✅ 197 通过，0 失败 | `deno test -A --minimum-dependency-age=0 --no-check tests/ --ignore=...` |
+| **Bun** | Linux / macOS / Windows | ✅ 179 通过，0 失败 | `bun test tests/adapters/ tests/server/ tests/utils/ tests/manager.test.ts` |
+| **Node.js 22** | Linux / macOS / Windows | ✅ 18/18 文件通过 | `node --import tsx --test-force-exit test-node.mjs`（主进程内执行，无 fork/IPC） |
+
+> Deno 197 与 Bun 179 的差异为嵌套步骤计数（Deno 单独计数嵌套 `describe` 步骤）；
+> 三端均 0 失败。
 
 ---
 

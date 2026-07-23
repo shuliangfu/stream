@@ -1,0 +1,33 @@
+{
+  "name": "@dreamer/stream",
+  "version": "1.1.0",
+  "description": "Streaming and live adapters for Deno/Bun/Node.js 22+.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./src/mod.ts",
+    "./client": "./src/client/mod.ts"
+  },
+  "scripts": {
+    "test": "deno test -A --minimum-dependency-age=0 --no-check tests/ --ignore=tests/integration,tests/client/browser-client.test.ts",
+    "test:integration": "deno test -A --minimum-dependency-age=0 --no-check tests/integration/",
+    "test:node": "node --import tsx --test-force-exit test-node.mjs",
+    "check": "deno check src/mod.ts src/client/mod.ts",
+    "lint": "deno lint src/"
+  },
+  "dependencies": {
+    "@dreamer/i18n": "npm:@jsr/dreamer__i18n@^1.1.2",
+    "@dreamer/runtime-adapter": "npm:@jsr/dreamer__runtime-adapter@^1.2.2",
+    "@dreamer/service": "npm:@jsr/dreamer__service@^1.1.0",
+    "@dreamer/socket-io": "npm:@jsr/dreamer__socket-io@^1.2.0",
+    "@dreamer/video": "npm:@jsr/dreamer__video@^1.1.0"
+  },
+  "devDependencies": {
+    "@dreamer/test": "npm:@jsr/dreamer__test@^1.2.3",
+    "tsx": "^4.19.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": ["stream", "live", "dreamer"]
+}

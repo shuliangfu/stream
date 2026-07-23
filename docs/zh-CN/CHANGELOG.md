@@ -7,6 +7,40 @@
 
 ---
 
+## [1.1.0] - 2026-07-23
+
+### 新增
+
+- **Node.js 22+ 兼容**：服务端包（适配器、StreamManager、ServerPublisher/ServerSubscriber、
+  工具函数）现可在 Node.js 22+ 运行。源码无 `Deno.*` API、无 `IS_NODE` 分支——所有运行时
+  差异经 `@dreamer/runtime-adapter` 抽象。client 子路径（`@dreamer/stream/client`）仍仅限浏览器。
+
+### 变更
+
+- 升级 `@dreamer/runtime-adapter` 至 ^1.2.2（IS_NODE 支持）。
+- 升级 `@dreamer/socket-io` 至 ^1.2.0——关键：socket-io 1.2.0 在 `connect()` 内懒加载
+  mongodb，修复 Bun 下 `import { Server }` 触发的 `NotImplementedError: node:v8
+  isBuildingSnapshot`（bson CJS 模块）错误。
+- 升级 `@dreamer/service` 至 ^1.1.0、`@dreamer/i18n` 至 ^1.1.2、`@dreamer/video` 至
+  ^1.1.0、`@dreamer/test` 至 ^1.2.3。
+- `deno.json` `compilerOptions.lib` 增加 `deno.ns` + `esnext`（防止 `nodeModulesDir:
+  "auto"` 加载 `@types/node` 覆盖 `ImportMeta`）。
+
+### 基础设施
+
+- 9-job CI 矩阵：3 Deno v2.9 + 3 Bun + 3 Node 22（Linux/macOS/Windows），无 Chromium、
+  无外部流媒体服务。适配器测试用 mock `fetch`。
+- `tsconfig.json`（Bundler 模式，供 tsx/Node 使用）。
+- `test-node.mjs`——Node 测试运行器，主进程内执行（不带 `--test` 标志→无 fork/IPC，
+  避免 logger 输出污染 stdout）。
+- `--minimum-dependency-age=0` 解析 JSR 依赖。
+- 集成测试（`tests/integration/`，需真实流媒体服务器 + `test.mp4`）与浏览器测试
+  （`tests/client/browser-client.test.ts`，需 Playwright）拆为 `test:integration`；
+  CI 仅跑 18 个单元测试文件。
+- `package.json` `engines.node >= 22`、`test:node` 脚本；`.npmrc` @jsr registry。
+
+---
+
 ## [1.0.0] - 2026-02-19
 
 ### 新增

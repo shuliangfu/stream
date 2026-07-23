@@ -4,15 +4,29 @@
 
 | Item                  | Value                           |
 | --------------------- | ------------------------------- |
-| **Package version**   | `@dreamer/stream@1.0.0-beta.4`  |
-| **Service container** | `@dreamer/service@1.0.0-beta.4` |
-| **Test framework**    | `@dreamer/test@^1.0.11`         |
-| **Test date**         | `2026-02-19`                    |
-| **Test environment**  | Deno 2.5+, Bun 1.0+             |
-| **Test file count**   | 21                              |
-| **Total test cases**  | 217                             |
+| **Package version**   | `@dreamer/stream@1.1.0`         |
+| **Service container** | `@dreamer/service@1.1.0`        |
+| **Test framework**    | `@dreamer/test@^1.2.3`          |
+| **Test date**         | `2026-07-23`                    |
+| **Test environment**  | Deno 2.9+, Bun 1.3+, Node.js 22+ |
+| **Test file count**   | 18 (unit; integration/browser excluded) |
+| **Total test cases**  | 197 (Deno)                      |
 | **Pass rate**         | 100% ✅                         |
-| **Execution time**    | ~17s                            |
+| **Execution time**    | ~4s (Deno)                      |
+
+### Cross-Runtime CI Results (Node.js 22+ Compatibility)
+
+CI runs 18 unit test files (excluding `tests/integration/` and
+`tests/client/browser-client.test.ts`) on 3 runtimes × 3 OSes (9 jobs):
+
+| Runtime | OS | Result | Notes |
+| ------- | -- | ------ | ----- |
+| **Deno 2.9** | Linux / macOS / Windows | ✅ 197 passed, 0 failed | `deno test -A --minimum-dependency-age=0 --no-check tests/ --ignore=...` |
+| **Bun** | Linux / macOS / Windows | ✅ 179 passed, 0 failed | `bun test tests/adapters/ tests/server/ tests/utils/ tests/manager.test.ts` |
+| **Node.js 22** | Linux / macOS / Windows | ✅ 18/18 files passed | `node --import tsx --test-force-exit test-node.mjs` (main-process, no fork/IPC) |
+
+> Deno 197 vs Bun 179: the difference is nested step counting (Deno counts
+> nested `describe` steps separately); 0 failures on all runtimes.
 
 ---
 
